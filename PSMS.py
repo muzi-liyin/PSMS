@@ -1,13 +1,10 @@
-from flask import Flask
+#!/usr/bin/env python
+# coding=utf-8
+from main import create_app
 
-app = Flask(__name__)
-
-
-@app.route('/')
-def hello_world():
-
-    return 'Hello World!'
+config = "default"
+app = create_app(config)
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host="0.0.0.0", port=5100)
