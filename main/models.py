@@ -9,4 +9,6 @@ class Users(db.Model):
     def __init__(self, name):
         self.name = name
     def __repr__(self):
-        return '<Model Users `{}`>'%(self.name)
+        users = ''
+        users += 'name: %s\n' %(self.name)
+        return users

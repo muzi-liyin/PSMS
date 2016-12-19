@@ -20,7 +20,5 @@ def select():
     if request.method == "POST":
         data = request.get_json(force=True)
         name = data["name"]
-        user = db.session.query(Users).filter_by(name=name).all()
-        print "===================="
-        print type(user)
-        print user[0]
+        user = db.session.query(Users).filter_by(name=name).first()
+        return user.name
