@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
+from main import db
 
-from flask import Flask
-from main import psms_db
+class Users(db.Model):
+    __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
 
-class Users(psms_db.Model):
-    id = psms_db.Column(psms_db.Integer, primary_key=True, nullable=False)
-    name = psms_db.Column(psms_db.String(20), nullable=False)
-
-    def __init__(self, id, name):
-        self.id = id
+    def __init__(self, name):
         self.name = name
     def __repr__(self):
-        return ''%(self.id, self.name)
-    psms_db.create_all()
+        return '<Model Users `{}`>'%(self.name)
