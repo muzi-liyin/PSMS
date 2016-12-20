@@ -1,3 +1,4 @@
+
 modules/stats/temp/*
 *.swp
 migrate_test_data.py
@@ -98,5 +99,15 @@ Temporary Items
 .pydevproject
 etc/config.json
 sftp-config.json
+
 utils/config.py
+
 /PSPM/main/config.py
+
+main/config.py
+
+.babelrc
+.idea/
+build/
+node_modules/
+
