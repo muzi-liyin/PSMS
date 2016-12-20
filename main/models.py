@@ -1,13 +1,90 @@
 # -*- coding: utf-8 -*-
 from main import db
 
+# 用户表
 class Users(db.Model):
     __tablename__ = 'users'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    passwd = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(100), nullable=False)
+    # users = db.relationship('Group', backref='users', lazy='dynamic')
+    # permissions = db.relationship('Permissions', backref='users', lazy='dynamic')
+    def __init__(self, name, email, passwd, phone):
+        self.name = name
+        self.email = email
+        self.passwd = passwd
+        self.phone = phone
+
+    def __repr__(self):
+        users = ''
+        users += 'name: %s\n' % (self.name)
+        return users
+
+# 用户组的表
+class Group(db.Model):
+    __tablename__ = 'group'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    group = db.Column(db.Integer, db.ForeignKey('users.id'))
+    # users = db.relationship('Users', backref='group', lazy='dynamic')
+    # permissions = db.relationship('Permissions', backref='group', lazy='dynamic')
+
+    def __init__(self, name):
+        self.name = name
+
+# 权限表
+class Permissions(db.Model):
+    __tablename__ = 'permissions'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    # users = db.relationship('Users', backref='permissions', lazy='dynamic')
+    # group = db.relationship('Group', backref='permissions', lazy='dynamic')
+
+    def __init__(self, name):
+        self.name = name
+
+# 模块表
+class Models(db.Model):
+    __tablename__ = 'models'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
 
     def __init__(self, name):
         self.name = name
+
+# 用户和用户组关联表
+user_group = db.Table('users_group',
+                      db.Column('users_id', db.Integer, db.ForeignKey('users.id')),
+                      db.Column('group_id', db.Integer, db.ForeignKey('group.id'))
+                      )
+# 用户组和权限关联表
+group_permissions = db.Table('group_permissions',
+                             db.Column('group_id', db.Integer, db.ForeignKey('group.id')),
+                             db.Column('permissions_id', db.Integer, db.ForeignKey('permissions.id'))
+                             )
+# 用户和权限关联表
+user_permissions = db.Table('user_permissions',
+                            db.Column('users_id', db.Integer, db.ForeignKey('users.id')),
+                            db.Column('permissions_id', db.Integer, db.ForeignKey('permissions.id'))
+                            )
+
+# 客户表
+class Customers(db.Model):
+    __tablename__ = 'customers'
+    id = db.Column(db.Integer, primary_key=True)
+    customer_code = db.Column(db.String(100), nullable=False, unique=True)
+    company_name = db.Column(db.String(100), nullable=False)
+    company_address = db.Column(db.String(100), nullable=False)
+    comment = db.Column(db.String(100), nullable=False)
+
+    def __init__(self, customer_code, company_name, company_address, comment):
+        self.customer_code = customer_code
+        self.company_name = company_name
+        self.company_address = company_address
+        self.comment = comment
+
     def __repr__(self):
         users = ''
         users += 'name: %s\n' %(self.name)
