@@ -50,10 +50,3 @@ def select():
         name = data["name"]
         user = db.session.query(Users).filter_by(name=name).first()
         return user.name
-
-
-@users.route('/offer', methods=['POST','GET'])
-def create_offer():
-    if request.method == "POST":
-        data = request.get_json(force=True)
-
