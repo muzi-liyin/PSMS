@@ -15,5 +15,7 @@ def create_app(config_name):
     db = SQLAlchemy(app)
     from users import users as users_blueprint
     app.register_blueprint(users_blueprint)
+    from offers import offers as offers_blueprint
+    app.register_blueprint(offers_blueprint)
 
     return app
