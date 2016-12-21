@@ -43,10 +43,10 @@ def login_out():
     return redirect(url_for('index'))
 
 
-@users.route('/select', methods=['POST', 'GET'])
-def select():
-    if request.method == "POST":
-        data = request.get_json(force=True)
-        name = data["name"]
-        user = db.session.query(Users).filter_by(name=name).first()
-        return user.name
+# @users.route('/select', methods=['POST', 'GET'])
+# def select():
+#     if request.method == "POST":
+#         data = request.get_json(force=True)
+#         name = data["name"]
+#         user = db.session.query(Users).filter_by(name=name).first()
+#         return user.name
