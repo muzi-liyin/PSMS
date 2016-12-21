@@ -34,7 +34,7 @@ def create_customer():
         db.create_all()
         resp = add_origin(json.dumps({"code": "200", "message": "success"}))
         return resp
-    resp = add_origin(json.dumps(json.dumps({"code": "500", "message": "failed"}))
+    resp = add_origin(json.dumps({"code": "500", "message": "failed"}))
     return resp
 
 
