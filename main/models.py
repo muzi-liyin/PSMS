@@ -3,13 +3,14 @@ from main import db
 
 
 # 用户表
-class Users(db.Model):
-    __tablename__ = 'users'
+class User(db.Model):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False, unique=True)
     email = db.Column(db.String(100), nullable=False)
     passwd = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
+    group = db.relationship('Group', backref='user', lazy='dynamic')# 反向映射关系
 
     def __init__(self, name, email, passwd, phone):
         self.name = name
@@ -18,9 +19,9 @@ class Users(db.Model):
         self.phone = phone
 
     def __repr__(self):
-        users = ''
-        users += 'name: %s\n' % (self.name)
-        return users
+        user = ''
+        user += 'name: %s\n' % (self.name)
+        return user
 
 
 # 用户组的表
@@ -28,6 +29,8 @@ class Group(db.Model):
     __tablename__ = 'group'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    permissions = db.relationship('Permissions', backref='group', lazy='dynamic')# 反向映射关系
 
     def __init__(self, name):
         self.name = name
@@ -38,6 +41,7 @@ class Permissions(db.Model):
     __tablename__ = 'permissions'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
 
     def __init__(self, name):
         self.name = name
@@ -67,7 +71,7 @@ class Customers(db.Model):
 class Offer(db.Model):
     __tablename__ = 'offer'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # 销售
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # 销售
     # advertiser_id = db.Column(db.Integer, db.ForeignKey('advertiser.id'))
     status = db.Column(db.String(100), default='active')
     contract_type = db.Column(db.String(100), default='cpa')  # 合同模式
@@ -149,7 +153,7 @@ class History(db.Model):
     __tablename__ = 'history'
     id = db.Column(db.Integer, primary_key=True)
     offer_id = db.Column(db.Integer, db.ForeignKey('offer.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     type = db.Column(db.String(100), default='default')
     status = db.Column(db.String(100), nullable=False)
     createdTime = db.Column(db.String(100), nullable=False)
