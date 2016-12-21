@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import uuid
 
 from flask import Flask, Blueprint, request
 from main import db
@@ -12,11 +13,15 @@ customers = Blueprint('customers', __name__)
 def create_customer():
     if request.method == "POST":
         data = request.get_json(force=True)
-        customer = Customers(data["customer_code"], data["company_name"], data['company_address'], data['comment'])
+        code = uuid.uuid1()
+        customer_code = str(code).upper()[:8]
+        if db.session.query(Customers).filter_by(company_address=data["company_name"]):
+            return 'company name has exist'
+        customer = Customers(customer_code, data["company_name"], data['company_address'], data['comment'])
         db.session.add(customer)
         db.session.commit()
         db.create_all()
-        return "hello"
+        return "ok"
 
 
 @customers.route('/customers', methods=['POST', 'GET'])
@@ -52,7 +57,7 @@ def edit_customer(id):
         customer.company_address = data['company_address']
         customer.comment = data['comment']
         db.session.commit()
-        return "hello"
+        return "ok"
 
 
 @customers.route('/customers/delete/<id>', methods=['POST', 'GET'])
@@ -61,4 +66,4 @@ def delete_customer(id):
         customer = db.session.query(Customers).filter_by(id=id).first()
         db.session.delete(customer)
         db.session.commit()
-        return "hello"
+        return "ok"
