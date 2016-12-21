@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
+
 from main import db
 
 
@@ -55,6 +57,7 @@ class Customers(db.Model):
     company_name = db.Column(db.String(100), nullable=False, unique=True)
     company_address = db.Column(db.String(100), nullable=False)
     comment = db.Column(db.String(100), nullable=False)
+    last_datetime = db.Column(db.DateTime, default=datetime.now())
 
     def __init__(self, customer_code, company_name, company_address, comment):
         self.customer_code = customer_code

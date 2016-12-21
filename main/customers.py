@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import uuid
+from datetime import datetime
 
 from flask import Flask, Blueprint, request
 
@@ -37,7 +38,8 @@ def customer():
                 'customer_code': customer.customer_code,
                 'company_name': customer.company_name,
                 'company_address': customer.company_address,
-                'comment': customer.comment
+                'comment': customer.comment,
+                'last_datetime':str(customer.last_datetime)
             }
             msg_list += [data]
         data = {}
@@ -69,6 +71,7 @@ def edit_customer(id):
         customer.company_name = data['company_name']
         customer.company_address = data['company_address']
         customer.comment = data['comment']
+        customer.last_datetime = datetime.now()
         db.session.commit()
         return json.dumps({"code": "200", "message": "success"})
     return json.dumps({"code": "500", "message": "request method error"})
