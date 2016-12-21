@@ -1,6 +1,21 @@
 import React from "react";
+import {AjaxSelect} from "./select";
+import {DateSingle,Daterange} from "./daterange";
+require("../lib/price-calendar");
 
 var CreateOffer = React.createClass({
+    componentDidMount(){
+        $("#price-calendar").priceCalendar();
+        $(".calendar_img").click(function () {
+            $(".price-calendar").show();
+        });
+        $(".cal-save").on("click",function () {
+            $(".price-calendar").hide();
+        })
+        $(".cal-cancel").on("click",function () {
+            $(".price-calendar").hide();
+        })
+    },
     render:function () {
         return (
             <div id="create_offer" className="row">
@@ -126,19 +141,13 @@ var CreateOffer = React.createClass({
                         投放起始
                     </div>
                     <div className="col-sm-3">
-                        <select className="form-control">
-                            <option>Yes</option>
-                            <option>No</option>
-                        </select>
+                        <DateSingle id="start_date" keyword="start_date"/>
                     </div>
                     <div className="col-sm-3 text-right">
                         投放截止
                     </div>
                     <div className="col-sm-3">
-                        <select className="form-control">
-                            <option>待定</option>
-                            <option>No</option>
-                        </select>
+                        <DateSingle id="end_date" keyword="end_date"/>
                     </div>
                 </div>
                 <div className="col-sm-10">
@@ -146,7 +155,7 @@ var CreateOffer = React.createClass({
                         投放平台
                     </div>
                     <div className="col-sm-9">
-                        <input type="text" className="form-control"/>
+                        <AjaxSelect className="tfpt" placeholder="投放平台"　multiple="true" url="https://api.github.com/search/repositories" />
                     </div>
                 </div>
                 <div className="col-sm-10">
@@ -154,7 +163,7 @@ var CreateOffer = React.createClass({
                         投放地区
                     </div>
                     <div className="col-sm-9">
-                        <input type="text" className="form-control"/>
+                        <AjaxSelect className="tfdq" placeholder="投放地区．．．"　multiple="true" url="https://api.github.com/search/repositories" />
                     </div>
                 </div>
                 <div className="col-sm-10">
@@ -163,6 +172,25 @@ var CreateOffer = React.createClass({
                     </div>
                     <div className="col-sm-9">
                         <button　className="btn btn-primary">Import</button>
+                    </div>
+                </div>
+                <div className="col-sm-10">
+                    <div className="col-sm-3"> </div>
+                    <div className="col-sm-9 table-responsive">
+                        <table className="table table-bordered text-center">
+                            <tbody>
+                                <tr>
+                                    <td>US</td>
+                                    <td><input type="number" className="form-control" /></td>
+                                    <td><img className="calendar_img" style={{cursor:"pointer"}} src="./src/img/calender.jpg"/></td>
+                                </tr>
+                                <tr>
+                                    <td>US</td>
+                                    <td><input type="number" className="form-control" /></td>
+                                    <td><img className="calendar_img" style={{cursor:"pointer"}} src="./src/img/calender.jpg"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 <div className="col-sm-10">
@@ -295,6 +323,11 @@ var CreateOffer = React.createClass({
                     <div className="col-sm-9">
                         <button className="btn btn-primary">Create/Update</button>
                         <button className="btn btn-warning" style={{marginLeft:"20px"}}>Cancel</button>
+                    </div>
+                </div>
+                <div className="mask price-calendar">
+                    <div className="mask_mask box-center">
+                        <div id="price-calendar"></div>
                     </div>
                 </div>
             </div>

@@ -14,6 +14,22 @@ module.exports = {
         filename:"[name].js",
         publicPath:"build/"
     },
+    devServer: {
+        historyApiFallback: true,
+        hot: true,
+        inline: true,
+        port: 8080,
+        changeOrigin: true,
+        proxy: {
+            '/': {
+                target: 'http://35.161.236.80:5100',
+                changeOrigin: true,
+                ws: true,
+                logLevel: 'debug',
+                stats: { colors: true }
+            }
+        }
+    },
     module:{
       loaders:[
           {test:/\.css/,loader:'style!css'},

@@ -80,9 +80,6 @@ var getForm = function (form,data) {
                 console.log( form +" [data-key='"+i+"."+str_arr[j].substr(0,str_pos)+"']")
                 $( form +" [data-key='"+i+"."+str_arr[j].substr(0,str_pos)+"']").val(str_arr[j].substr(str_pos+1))
             }
-            /*var str = i+"."+.split(":").join(".");
-            var str_pos = str.lastIndexOf(".");
-            */
         }else if($( form +" [data-key="+i+"]").attr("type")=="radio"){
             $( form +" [data-key="+i+"]").each(function () {
                 if($(this).val() == obj[i]){
