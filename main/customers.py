@@ -39,7 +39,7 @@ def customer():
                 'company_name': customer.company_name,
                 'company_address': customer.company_address,
                 'comment': customer.comment,
-                'last_datetime':str(customer.last_datetime)
+                'last_datetime': str(customer.last_datetime)
             }
             msg_list += [data]
         data = {}
@@ -58,7 +58,9 @@ def query_customer(id):
         data['code'] = '200'
         data['message'] = 'success'
         data['results'] = {'customer_code': customer.customer_code, 'company_name': customer.company_name,
-                           'company_address': customer.company_address, 'comment': customer.comment}
+                           'company_address': customer.company_address, 'comment': customer.comment,
+                           'last_datetime': str(customer.last_datetime)
+                           }
         return json.dumps(data)
     return json.dumps({"code": "500", "message": "request method error"})
 
@@ -71,7 +73,7 @@ def edit_customer(id):
         customer.company_name = data['company_name']
         customer.company_address = data['company_address']
         customer.comment = data['comment']
-        customer.last_datetime = datetime.now()
+        customer.last_datetime = str(datetime.now())
         db.session.commit()
         return json.dumps({"code": "200", "message": "success"})
     return json.dumps({"code": "500", "message": "request method error"})
