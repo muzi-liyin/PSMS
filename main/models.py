@@ -36,8 +36,6 @@ class Users(db.Model):
     permissions = db.relationship('Permissions', secondary=user_permissions,
                             backref=db.backref('users', lazy='dynamic'),
                             lazy='dynamic')
-    # group_id = db.Column(db.Integer,db.ForeignKey('group.id'))
-    # permissions_id = db.Column(db.Integer,db.ForeignKey('permissions.id'))
     def __init__(self, name, email, passwd, phone):
         self.name = name
         self.email = email
@@ -58,8 +56,6 @@ class Group(db.Model):
     permissions = db.relationship('Permissions', secondary=group_permissions,
                             backref=db.backref('group', lazy='dynamic'),
                             lazy='dynamic')
-    # users = db.relationship('Users', backref='group', lazy='dynamic')
-    # permissions_id = db.Column(db.Integer, db.ForeignKey('permissions.id'))
 
     def __init__(self, name):
         self.name = name
@@ -71,20 +67,9 @@ class Permissions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
 
-    # users = db.relationship('Users', backref='group', lazy='dynamic')
 
     def __init__(self, name):
         self.name = name
-
-
-# # 模块表
-# class Models(db.Model):
-#     __tablename__ = 'models'
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(100), nullable=False)
-#
-#     def __init__(self, name):
-#         self.name = name
 
 
 # 客户表
@@ -102,10 +87,10 @@ class Customers(db.Model):
         self.company_address = company_address
         self.comment = comment
 
-    # def __repr__(self):
-    #     customer_code = ''
-    #     customer_code += 'name: %s\n' % (self.customer_code)
-    #     return customer_code
+    def __repr__(self):
+        customer_code = ''
+        customer_code += 'name: %s\n' % (self.customer_code)
+        return customer_code
 
 
 class Offer(db.Model):
