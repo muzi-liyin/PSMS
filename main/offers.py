@@ -2,13 +2,56 @@
 
 from flask import Blueprint, request
 from main import db
-from models import Offer, History, User
+from models import Offer, History, User, Customers, Country
 import json
 import datetime, time
+import xlrd
 
 offers = Blueprint('offers', __name__)
 
-@offers.route('/create_offer', methods=['POST','GET'])
+@offers.route('/api/customer_select', methods=['POST','GET'])
+def customerSelect():
+    if request.method == "POST":
+        data = request.get_json(force=True)
+        result = []
+        customers = Customers.query.filter(Customers.company_name.ilike('%'+data["name"]+'%')).all()
+        for i in customers:
+            data = {
+                "customer_id": i.id,
+                "company_name": i.company_name
+            }
+            result += [data]
+        response = {
+            "code": 200,
+            "result": result
+        }
+        return json.dumps(response)
+
+@offers.route('/api/country_select', methods=["POST","GET"])
+def countrySelect():
+    if request.method == "POST":
+        data = request.get_json(force=True)
+        result = []
+        if u'\u4e00' <= data["name"] <= u'\u9fff':
+            countries = Country.query.filter(Country.chinese.ilike('%'+data["name"]+'%')).all()
+        else:
+            countries = Country.query.filter(Country.british.ilike('%'+data["name"]+'%')).all()
+        for i in countries:
+            data = {
+                "id": i.shorthand,
+                "text": i.chinese
+            }
+            result += [data]
+        response = {
+            "code": 200,
+            "result": result,
+            "message": "success"
+        }
+        return json.dumps(response)
+    else:
+        return json.dumps({"code": 500, "message":"The request type wrong!"})
+
+@offers.route('/api/create_offer', methods=['POST','GET'])
 def createOffer():
     if request.method == "POST":
         data = request.get_json(force=True)
@@ -16,8 +59,7 @@ def createOffer():
         email_time = "2016-12-19 "+data["email_time"]+":00"
         data["email_time"] = time.mktime(time.strptime(email_time,'%Y-%m-%d %H:%M:%S'))
 
-        offer = Offer(int(data["user_id"]),data["status"],data["contract_type"],data["contract_num"],float(data["contract_scale"]),data["os"],data["package_name"],data["app_name"],data["app_type"].encode('utf-8'),data["preview_link"],data["track_link"],data["material"],data["startTime"],data["endTime"],data["platform"],data["country"],float(data["price"]),float(data["daily_budget"]),data["daily_type"],float(data["total_budget"]),data["total_type"],data["distribution"],data["authorized"],data["named_rule"],data["KPI"].encode('utf-8'),data["settlement"].encode('utf-8'),data["period"].encode('utf-8'),data["remark"].encode('utf-8'),data["email_time"],data["email_users"],data["email_tempalte"],data["createdTime"],data["createdTime"])
-
+        offer = Offer(int(data["user_id"]),int(data["customer_id"]),data["status"],data["contract_type"],data["contract_num"],float(data["contract_scale"]),data["os"],data["package_name"],data["app_name"],data["app_type"].encode('utf-8'),data["preview_link"],data["track_link"],data["material"],data["startTime"],data["endTime"],data["platform"],data["country"],float(data["price"]),float(data["daily_budget"]),data["daily_type"],float(data["total_budget"]),data["total_type"],data["distribution"],data["authorized"],data["named_rule"],data["KPI"].encode('utf-8'),data["settlement"].encode('utf-8'),data["period"].encode('utf-8'),data["remark"].encode('utf-8'),data["email_time"],data["email_users"],data["email_tempalte"],data["createdTime"],data["createdTime"])
         try:
             db.session.add(offer)
             db.session.commit()
@@ -33,7 +75,7 @@ def createOffer():
             print e
             return json.dumps({"code":500, "message":"fail"})
 
-@offers.route('/update_offer', methods=["POST","GET"])
+@offers.route('/api/update_offer', methods=["POST","GET"])
 def updateOffer():
     if request.method == "POST":
         data = request.get_json(force=True)
@@ -73,7 +115,7 @@ def updateOffer():
         else:
             return json.dumps({"code":400, "message": "offer is None"})
 
-@offers.route("/history", methods=["POST","GET"])
+@offers.route("/api/history", methods=["POST","GET"])
 def historty():
     if request.method == "POST":
         data = request.get_json(force=True)
@@ -198,3 +240,20 @@ def historty():
                 "result": reduce(f, [[], ] + result)
             }
             return json.dumps(response)
+
+#导入国家表
+@offers.route("/api/country")
+def country():
+    wb = xlrd.open_workbook("/Users/liyin/Downloads/1.xlsx")
+
+    wb.sheet_names()
+    sh = wb.sheet_by_name(u'Sheet1')
+    count = 0
+    for rownum in range(sh.nrows):
+        country = Country(sh.row_values(rownum)[0], sh.row_values(rownum)[1], sh.row_values(rownum)[2])
+        db.session.add(country)
+        db.session.commit()
+        db.create_all()
+        count += 1
+
+    print count
