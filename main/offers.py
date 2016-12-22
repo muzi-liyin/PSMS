@@ -2,7 +2,7 @@
 
 from flask import Blueprint, request
 from main import db
-from models import Offer, History, Users, Customers, Country
+from models import Offer, History, User, Customers, Country
 import json
 import datetime, time
 import xlrd
@@ -60,7 +60,6 @@ def createOffer():
         data["email_time"] = time.mktime(time.strptime(email_time,'%Y-%m-%d %H:%M:%S'))
 
         offer = Offer(int(data["user_id"]),int(data["customer_id"]),data["status"],data["contract_type"],data["contract_num"],float(data["contract_scale"]),data["os"],data["package_name"],data["app_name"],data["app_type"].encode('utf-8'),data["preview_link"],data["track_link"],data["material"],data["startTime"],data["endTime"],data["platform"],data["country"],float(data["price"]),float(data["daily_budget"]),data["daily_type"],float(data["total_budget"]),data["total_type"],data["distribution"],data["authorized"],data["named_rule"],data["KPI"].encode('utf-8'),data["settlement"].encode('utf-8'),data["period"].encode('utf-8'),data["remark"].encode('utf-8'),data["email_time"],data["email_users"],data["email_tempalte"],data["createdTime"],data["createdTime"])
-
         try:
             db.session.add(offer)
             db.session.commit()
@@ -155,7 +154,7 @@ def historty():
                     status = i.status
                     createdTime = i.createdTime
                     user_id = i.user_id
-                    user = Users.query.filter(Users.id==user_id).first()
+                    user = User.query.filter(User.id==user_id).first()
                     detail = {
                         "username": user.name,
                         "status": status,
@@ -169,7 +168,7 @@ def historty():
                     contract_scale = i.contract_scale
                     createdTime = i.createdTime
                     user_id = i.user_id
-                    user = Users.query.filter(Users.id == user_id).first()
+                    user = User.query.filter(User.id == user_id).first()
                     detail = {
                         "username": user.name,
                         "contract_type": contract_type,
@@ -184,7 +183,7 @@ def historty():
                     price = i.price
                     createdTime = i.createdTime
                     user_id = i.user_id
-                    user = Users.query.filter(Users.id==user_id).first()
+                    user = User.query.filter(User.id==user_id).first()
                     detail = {
                         "username": user.name,
                         "price": price,
@@ -198,7 +197,7 @@ def historty():
                     daily_type = i.daily_type
                     createdTime = i.createdTime
                     user_id = i.user_id
-                    user = Users.query.filter(Users.id==user_id).first()
+                    user = User.query.filter(User.id==user_id).first()
                     detail = {
                         "username": user.name,
                         "daily_budget": daily_budget,
@@ -213,7 +212,7 @@ def historty():
                     total_type = i.total_type
                     createdTime = i.createdTime
                     user_id = i.user_id
-                    user = Users.query.filter(Users.id==user_id).first()
+                    user = User.query.filter(User.id==user_id).first()
                     detail = {
                         "username": user.name,
                         "total_budget": total_budget,
@@ -227,7 +226,7 @@ def historty():
                     KPI = i.KPI
                     createdTime = i.createdTime
                     user_id = i.user_id
-                    user = Users.query.filter(Users.id==user_id).first()
+                    user = User.query.filter(User.id==user_id).first()
                     detail = {
                         "username": user.name,
                         "KPI": KPI,
