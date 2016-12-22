@@ -18,15 +18,11 @@ module.exports = {
         historyApiFallback: true,
         hot: true,
         inline: true,
-        port: 8080,
-        changeOrigin: true,
+        stats: { colors: true },
         proxy: {
-            '/': {
-                target: 'http://35.161.236.80:5100',
-                changeOrigin: true,
-                ws: true,
-                logLevel: 'debug',
-                stats: { colors: true }
+            '/api/*': {
+                target: 'http://192.168.0.214:5100',
+                changeOrigin: true
             }
         }
     },

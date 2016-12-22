@@ -1,23 +1,37 @@
 import React from "react";
 import {ajax} from "../lib/ajax";
 import {valid,setForm,getForm} from "../lib/form";
-import {config} from "../lib/config";
 
 var CreateCustomer = React.createClass({
     submit(){
         if(valid("#create_customer","data-required")){
             var data = setForm("#create_customer","data-key");
-            ajax("post",config.url+"/customers/create",data,function (data) {
-                console.log(data)
+            var url = this.props.params.id?"/api/customers/edit/"+this.props.params.id:"/api/customers/create";
+            ajax("post",url,JSON.stringify(data)).then(function (data) {
+                var data = JSON.parse(data);
+                if(data.code=="200"){
+                    location.hash = "customer_list";
+                }else {
+                    $(".ajax_error").html(data.message);
+                    $(".modal").modal("toggle");
+                }
             });
         }else {
             $(".has-error input:first").focus();
         }
-        /*<p>{this.props.params.name}</p>*/
     },
     componentDidMount(){
-      var data ={"company":{"name":"名称","address":"地址","select":"2"},"radio":"2","remark":"备注"};
-      getForm("#create_customer",data)
+        if(this.props.params.id){
+            ajax("get","/api/customers/query/"+this.props.params.id).then(function (data) {
+                var data = JSON.parse(data);
+                if(data.code=="200"){
+                    getForm("#create_customer",data.results)
+                }else {
+                    $(".ajax_error").html(data.message);
+                    $(".modal").modal("toggle");
+                }
+            });
+        }
     },
     render:function () {
         return (
@@ -68,7 +82,7 @@ var CreateCustomer = React.createClass({
                     <div className="form-group">
                         <div className="col-sm-offset-2 col-sm-10">
                             <button onClick={this.submit} type="button" className="btn btn-primary">Create/Update</button>
-                            <button type="button" className="btn btn-warning" style={{marginLeft:"20px"}}>Cancel</button>
+                            <a href={this.props.params.id?"javascript:history.go(-1)":"javascript:void(0)"} type="button" className="btn btn-warning" style={{marginLeft:"20px"}}>Cancel</a>
                         </div>
                     </div>
                 </form>

@@ -3,9 +3,9 @@
  */
 let location_hostname = location.hostname;
 let url="";
-if(location_hostname.includes("localhost")>-1 || location_hostname.includes("35.161.236.80")>-1 ){
-    url = "http://35.161.236.80:5100";
-}else {
+if(location_hostname.includes("localhost")>-1){
+    url = "/api";
+}else{
     url = "";
 }
 const config = {
