@@ -19,7 +19,7 @@ def create_customer():
         customer_code = str(code).upper()[:8]
         if db.session.query(Customers).filter_by(company_name=data["company_name"]).first():
             return json.dumps({"code": "500", "message": "customer has exits"})
-        customer = Customers(customer_code, data["company_name"], data['company_address'], data['comment'])
+        customer = Customers(customer_code, data["company_name"], data['company_address'], data['comment'],'Created')
         db.session.add(customer)
         db.session.commit()
         db.create_all()
@@ -39,13 +39,18 @@ def customer():
                 'company_name': customer.company_name,
                 'company_address': customer.company_address,
                 'comment': customer.comment,
-                'last_datetime': str(customer.last_datetime)
+                'last_datetime': str(customer.last_datetime),
+                'status':customer.status
             }
             msg_list += [data]
+        created_list = []
+        for msg in msg_list:
+            if msg['status'] == 'Created':
+                created_list.append(msg)
         data = {}
         data['code'] = '200'
         data['message'] = 'success'
-        data['results'] = msg_list
+        data['results'] = created_list
         return json.dumps(data)
     return json.dumps({"code": "500", "message": "request method error"})
 
@@ -70,12 +75,15 @@ def edit_customer(id):
     if request.method == "POST":
         data = request.get_json(force=True)
         customer = db.session.query(Customers).filter_by(id=id).first()
-        customer.company_name = data['company_name']
-        customer.company_address = data['company_address']
-        customer.comment = data['comment']
-        customer.last_datetime = str(datetime.now())
-        db.session.commit()
-        return json.dumps({"code": "200", "message": "success"})
+        if customer:
+            customer.company_name = data['company_name']
+            customer.company_address = data['company_address']
+            customer.comment = data['comment']
+            customer.last_datetime = str(datetime.now())
+            db.session.commit()
+            return json.dumps({"code": "200", "message": "success"})
+        else:
+            return json.dumps({"code": "500", "message": "don't have this data"})
     return json.dumps({"code": "500", "message": "request method error"})
 
 
@@ -83,7 +91,7 @@ def edit_customer(id):
 def delete_customer(id):
     if request.method == "POST":
         customer = db.session.query(Customers).filter_by(id=id).first()
-        db.session.delete(customer)
+        customer.status = 'Deleted'
         db.session.commit()
         return json.dumps({"code": "200", "message": "success"})
     return json.dumps({"code": "500", "message": "request method error"})

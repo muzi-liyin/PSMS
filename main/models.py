@@ -12,7 +12,7 @@ class User(db.Model):
     email = db.Column(db.String(100), nullable=False)
     passwd = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
-    group = db.relationship('Group', backref='user', lazy='dynamic')# 反向映射关系
+    group = db.relationship('Group', backref='user', lazy='dynamic')  # 反向映射关系
 
     def __init__(self, name, email, passwd, phone):
         self.name = name
@@ -32,7 +32,7 @@ class Group(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    permissions = db.relationship('Permissions', backref='group', lazy='dynamic')# 反向映射关系
+    permissions = db.relationship('Permissions', backref='group', lazy='dynamic')  # 反向映射关系
 
     def __init__(self, name):
         self.name = name
@@ -48,6 +48,12 @@ class Permissions(db.Model):
     def __init__(self, name):
         self.name = name
 
+# 用户表
+# 角色表
+# 用户组表
+# 权限表
+# 用户用户组关联表
+# 关联表
 
 # 客户表
 class Customers(db.Model):
@@ -58,12 +64,14 @@ class Customers(db.Model):
     company_address = db.Column(db.String(100), nullable=False)
     comment = db.Column(db.String(100), nullable=False)
     last_datetime = db.Column(db.DateTime, default=datetime.now())
+    status = db.Column(db.String(100), nullable=False, default='Created')
 
-    def __init__(self, customer_code, company_name, company_address, comment):
+    def __init__(self, customer_code, company_name, company_address, comment, status):
         self.customer_code = customer_code
         self.company_name = company_name
         self.company_address = company_address
         self.comment = comment
+        self.status = status
 
     def __repr__(self):
         customer_code = ''
