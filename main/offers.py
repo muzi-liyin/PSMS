@@ -9,6 +9,10 @@ import xlrd
 
 offers = Blueprint('offers', __name__)
 
+# @offers.route('/',methods=["GET"])
+# def index():
+#     return
+
 @offers.route('/api/customer_select', methods=['POST','GET'])
 def customerSelect():
     if request.method == "POST":
@@ -86,7 +90,11 @@ def offerShow():
         customer = Customers.query.filter_by(id==customerId).first()
         customerName = customer.company_name   #客户名称
         status = i.status
-
+        contract_type = i.contract_type
+        if contract_type != "cpa":
+            contract_scale = 0
+        else:
+            contract_scale = i.contract_scale
 
 
 @offers.route('/api/update_offer', methods=["POST","GET"])
