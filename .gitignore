@@ -1,3 +1,4 @@
+
 modules/stats/temp/*
 *.swp
 migrate_test_data.py
@@ -20,7 +21,6 @@ __pycache__/
 .Python
 env/
 !modules/dashboard/static/bower_components/metro/build/*
-build/
 develop-eggs/
 downloads/
 eggs/
@@ -98,5 +98,14 @@ Temporary Items
 .pydevproject
 etc/config.json
 sftp-config.json
+
 utils/config.py
+
 /PSPM/main/config.py
+
+main/config.py
+
+.babelrc
+.idea/
+node_modules/
+
