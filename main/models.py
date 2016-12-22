@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
-
 from main import db
-
 
 # 用户表
 class User(db.Model):
@@ -82,7 +80,7 @@ class Customers(db.Model):
 class Offer(db.Model):
     __tablename__ = 'offer'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id')) #销售
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id')) #销售
     customer_id = db.Column(db.Integer, db.ForeignKey('customers.id')) #客户
     status = db.Column(db.String(100), default='active')
     contract_type = db.Column(db.String(100),default='cpa') #合同模式
