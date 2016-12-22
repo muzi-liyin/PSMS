@@ -108,6 +108,5 @@ main/config.py
 
 .babelrc
 .idea/
-build/
 node_modules/
 
