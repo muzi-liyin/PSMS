@@ -3,6 +3,22 @@ from datetime import datetime
 
 from main import db
 
+# 用户,用户组关联表
+user_group = db.Table('user_group',
+                      db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+                      db.Column('group_id', db.Integer, db.ForeignKey('group.id'))
+                      )
+# 用户组,权限关联表
+group_permissions = db.Table('group_permissions',
+                             db.Column('group_id', db.Integer, db.ForeignKey('group.id')),
+                             db.Column('permissions_id', db.Integer, db.ForeignKey('permissions.id'))
+                             )
+# 用户,权限关联表
+user_permissions = db.Table('user_permissions',
+                            db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+                            db.Column('permissions_id', db.Integer, db.ForeignKey('permissions.id'))
+                            )
+
 
 # 用户表
 class User(db.Model):
@@ -12,7 +28,9 @@ class User(db.Model):
     email = db.Column(db.String(100), nullable=False)
     passwd = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
-    group = db.relationship('Group', backref='user', lazy='dynamic')  # 反向映射关系
+    group = db.relationship('Group', secondary=user_group,
+                            backref=db.backref('user', lazy='dynamic'),
+                            lazy='dynamic')
 
     def __init__(self, name, email, passwd, phone):
         self.name = name
@@ -31,8 +49,9 @@ class Group(db.Model):
     __tablename__ = 'group'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    permissions = db.relationship('Permissions', backref='group', lazy='dynamic')  # 反向映射关系
+    permissions = db.relationship('Permissions', secondary=group_permissions,
+                                  backref=db.backref('group', lazy='dynamic'),
+                                  lazy='dynamic')
 
     def __init__(self, name):
         self.name = name
@@ -43,17 +62,13 @@ class Permissions(db.Model):
     __tablename__ = 'permissions'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
+    user = db.relationship('User', secondary=user_permissions,
+                           backref=db.backref('Permissions', lazy='dynamic'),
+                           lazy='dynamic')
 
     def __init__(self, name):
         self.name = name
 
-# 用户表
-# 角色表
-# 用户组表
-# 权限表
-# 用户用户组关联表
-# 关联表
 
 # 客户表
 class Customers(db.Model):
