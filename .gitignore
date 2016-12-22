@@ -21,7 +21,6 @@ __pycache__/
 .Python
 env/
 !modules/dashboard/static/bower_components/metro/build/*
-build/
 develop-eggs/
 downloads/
 eggs/
