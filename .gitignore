@@ -99,4 +99,4 @@ Temporary Items
 etc/config.json
 sftp-config.json
 utils/config.py
-main/config.py
+/PSPM/main/config.py

@@ -75,6 +75,20 @@ def createOffer():
             print e
             return json.dumps({"code":500, "message":"fail"})
 
+@offers.route('/api/offer_show',methods=["POST","GET"])
+def offerShow():
+    offers = Offer.query.all()
+    for i in offers:
+        userId = i.user_id
+        user = User.query.filter_by(id==userId).first()
+        userName = user.name  #销售名字
+        customerId = i.customer_id
+        customer = Customers.query.filter_by(id==customerId).first()
+        customerName = customer.company_name   #客户名称
+        status = i.status
+
+
+
 @offers.route('/api/update_offer', methods=["POST","GET"])
 def updateOffer():
     if request.method == "POST":

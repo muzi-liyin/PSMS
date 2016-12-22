@@ -1,10 +1,13 @@
 from flask.ext.script import Manager, Server
+from flask.ext.migrate import Migrate, MigrateCommand
 import main
 import PSMS
 
 manager = Manager(PSMS.app)
+migrate = Migrate(PSMS.app, main.db)
+manager.add_command('db', MigrateCommand)
 
-manager.add_command("server", Server())
+# manager.add_command("server", Server())
 @manager.shell
 def make_shell_context():
     """Create a python CLI.
