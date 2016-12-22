@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
-
 from main import db
 
 # 用户,用户组关联表
@@ -98,7 +97,7 @@ class Offer(db.Model):
     __tablename__ = 'offer'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # 销售
-    # advertiser_id = db.Column(db.Integer, db.ForeignKey('advertiser.id'))
+    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'))  # 客户
     status = db.Column(db.String(100), default='active')
     contract_type = db.Column(db.String(100), default='cpa')  # 合同模式
     contract_num = db.Column(db.String(100), nullable=False)  # 合同编号
@@ -131,13 +130,14 @@ class Offer(db.Model):
     email_tempalte = db.Column(db.Integer, nullable=False)  # 报告模版
     createdTime = db.Column(db.String(100), nullable=False)
     updateTime = db.Column(db.String(100), nullable=False)
+    historys = db.relationship('History', backref='offer', lazy='dynamic')
 
-    def __init__(self, user_id, status, contract_type, contract_num, contract_scale, os, package_name, app_name,
-                 app_type, preview_link, track_link, material, startTime, endTime, platform, country, price,
+    def __init__(self, user_id, customer_id, status, contract_type, contract_num, contract_scale, os, package_name,
+                 app_name, app_type, preview_link, track_link, material, startTime, endTime, platform, country, price,
                  daily_budget, daily_type, total_budget, total_type, distribution, authorized, named_rule, KPI,
                  settlement, period, remark, email_time, email_users, email_tempalte, createdTime, updateTime):
         self.user_id = user_id
-        # self.advertiser_id = advertiser_id
+        self.customer_id = customer_id
         self.status = status
         self.contract_type = contract_type
         self.contract_num = contract_num
@@ -215,3 +215,19 @@ class History(db.Model):
 
     def __repr__(self):
         return '<History {}>'.format(self.id)
+
+
+# 国家编码
+class Country(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    shorthand = db.Column(db.String(100), nullable=False)  # 两位字母简写
+    british = db.Column(db.String(100), nullable=False)  # 英文全称
+    chinese = db.Column(db.String(100), nullable=False)  # 中文
+
+    def __init__(self, shorthand, british, chinese):
+        self.shorthand = shorthand
+        self.british = british
+        self.chinese = chinese
+
+    def __repr__(self):
+        return '<Country {}>'.format(self.id)
