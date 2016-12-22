@@ -14,7 +14,7 @@ def make_shell_context():
     """
     return dict(app=PSMS.app,
                 db = main.db,
-                Users=main.models.Users)
+                Users=main.models.User)
 
 if __name__ == '__main__':
     manager.run()

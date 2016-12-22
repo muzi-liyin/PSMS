@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
+
 from main import db
 
+
 # 用户表
-class Users(db.Model):
-    __tablename__ = 'users'
+class User(db.Model):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False, unique=True)
     email = db.Column(db.String(100), nullable=False)
     passwd = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
-    # users = db.relationship('Group', backref='users', lazy='dynamic')
-    # permissions = db.relationship('Permissions', backref='users', lazy='dynamic')
+    group = db.relationship('Group', backref='user', lazy='dynamic')  # 反向映射关系
+
     def __init__(self, name, email, passwd, phone):
         self.name = name
         self.email = email
@@ -18,77 +21,63 @@ class Users(db.Model):
         self.phone = phone
 
     def __repr__(self):
-        users = ''
-        users += 'name: %s\n' % (self.name)
-        return users
+        user = ''
+        user += 'name: %s\n' % (self.name)
+        return user
+
 
 # 用户组的表
 class Group(db.Model):
     __tablename__ = 'group'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    group = db.Column(db.Integer, db.ForeignKey('users.id'))
-    # users = db.relationship('Users', backref='group', lazy='dynamic')
-    # permissions = db.relationship('Permissions', backref='group', lazy='dynamic')
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    permissions = db.relationship('Permissions', backref='group', lazy='dynamic')  # 反向映射关系
 
     def __init__(self, name):
         self.name = name
+
 
 # 权限表
 class Permissions(db.Model):
     __tablename__ = 'permissions'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    # users = db.relationship('Users', backref='permissions', lazy='dynamic')
-    # group = db.relationship('Group', backref='permissions', lazy='dynamic')
+    group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
 
     def __init__(self, name):
         self.name = name
 
-# 模块表
-class Models(db.Model):
-    __tablename__ = 'models'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-
-    def __init__(self, name):
-        self.name = name
-
-# 用户和用户组关联表
-user_group = db.Table('users_group',
-                      db.Column('users_id', db.Integer, db.ForeignKey('users.id')),
-                      db.Column('group_id', db.Integer, db.ForeignKey('group.id'))
-                      )
-# 用户组和权限关联表
-group_permissions = db.Table('group_permissions',
-                             db.Column('group_id', db.Integer, db.ForeignKey('group.id')),
-                             db.Column('permissions_id', db.Integer, db.ForeignKey('permissions.id'))
-                             )
-# 用户和权限关联表
-user_permissions = db.Table('user_permissions',
-                            db.Column('users_id', db.Integer, db.ForeignKey('users.id')),
-                            db.Column('permissions_id', db.Integer, db.ForeignKey('permissions.id'))
-                            )
+# 用户表
+# 角色表
+# 用户组表
+# 权限表
+# 用户用户组关联表
+# 关联表
 
 # 客户表
 class Customers(db.Model):
     __tablename__ = 'customers'
     id = db.Column(db.Integer, primary_key=True)
     customer_code = db.Column(db.String(100), nullable=False, unique=True)
-    company_name = db.Column(db.String(100), nullable=False)
+    company_name = db.Column(db.String(100), nullable=False, unique=True)
     company_address = db.Column(db.String(100), nullable=False)
     comment = db.Column(db.String(100), nullable=False)
+    last_datetime = db.Column(db.DateTime, default=datetime.now())
+    status = db.Column(db.String(100), nullable=False, default='Created')
 
-    def __init__(self, customer_code, company_name, company_address, comment):
+    def __init__(self, customer_code, company_name, company_address, comment, status):
         self.customer_code = customer_code
         self.company_name = company_name
         self.company_address = company_address
         self.comment = comment
+        self.status = status
 
     def __repr__(self):
-        users = ''
-        users += 'name: %s\n' %(self.name)
-        return users
+        customer_code = ''
+        customer_code += 'name: %s\n' % (self.customer_code)
+        return customer_code
+
 
 class Offer(db.Model):
     __tablename__ = 'offer'
@@ -171,7 +160,7 @@ class History(db.Model):
     __tablename__ = 'history'
     id = db.Column(db.Integer, primary_key=True)
     offer_id = db.Column(db.Integer, db.ForeignKey('offer.id'))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     type = db.Column(db.String(100), default='default')
     status = db.Column(db.String(100), nullable=False)
     createdTime = db.Column(db.String(100), nullable=False)
@@ -186,7 +175,9 @@ class History(db.Model):
     contract_type = db.Column(db.String(100), nullable=False) # 合同模式
     contract_scale = db.Column(db.Float, default=0)  # 合同模式为服务费时存在
 
-    def __init__(self, offer_id, user_id, type, createdTime,status=None, country=None,country_price=0, price=0,daily_budget=0,daily_type=None,total_budget=0,total_type=None,KPI=None,contract_type=None,contract_scale=None):
+    def __init__(self, offer_id, user_id, type, createdTime, status=None, country=None, country_price=0, price=0,
+                 daily_budget=0, daily_type=None, total_budget=0, total_type=None, KPI=None, contract_type=None,
+                 contract_scale=None):
         self.offer_id = offer_id
         self.user_id = user_id
         self.type = type
