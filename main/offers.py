@@ -103,7 +103,7 @@ def offerShow():
             "app_name": app_name,
             "startTime": i.startTime,
             "endTime": i.endTime,
-            "country": (i.country).decode("utf-8"),
+            "country": str(i.country),
             "price": i.price,
             "updateTime": i.updateTime
         }
@@ -154,7 +154,7 @@ def offerDetail(id):
         "startTime": offer.startTime,
         "endTime": offer.endTime,
         "platform": platform,
-        "country": (offer.country).decode("utf-8"),
+        "country": str(offer.country),
         "price": offer.price,
         "daily_budget": offer.daily_budget,
         "daily_type": offer.daily_type,
