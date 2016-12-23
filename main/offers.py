@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from flask import Blueprint, request, render_template,safe_join, Response, send_file,make_response
+from flask import Blueprint, request,safe_join, Response, send_file,make_response
 from main import db
-from models import Offer, History, User, Customers, Country
+from models import Offer, History, User, Customers, Country, TimePrice
 import json
 import os
 import datetime, time
@@ -58,8 +58,8 @@ def countrySelect():
 def createOffer():
     if request.method == "POST":
         data = request.get_json(force=True)
-        createdTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        updateTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        createdTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+datetime.timedelta(hours=8)
+        updateTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+datetime.timedelta(hours=8)
         email_time = "2016-12-19 "+data["email_time"]+":00"
         emailTime = float(time.mktime(time.strptime(email_time,'%Y-%m-%d %H:%M:%S')))
         userName = data["user_id"].encode('utf-8')
@@ -127,6 +127,16 @@ def offerDetail(id):
         contract_scale = 0
     else:
         contract_scale = offer.contract_scale
+    plate = offer.platform
+    if len(plate) > 12:
+        platform = []
+        first = plate.split('[]',1)[0].split(',',1)[0].split('[')[1]
+        second = plate.split('[]',1)[0].split(',',1)[1].split(']')[0]
+        platform.append(first)
+        platform.append(second)
+    else:
+        platform = offer.platform
+    emailTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(offer.email_time))[11:16]
     result = {
         "customer_id": customer.company_name,
         "status": offer.status,
@@ -142,7 +152,7 @@ def offerDetail(id):
         "material": offer.material,
         "startTime": offer.startTime,
         "endTime": offer.endTime,
-        "platform": offer.platform,
+        "platform": platform,
         "country": offer.country,
         "price": offer.price,
         "daily_budget": offer.daily_budget,
@@ -156,7 +166,7 @@ def offerDetail(id):
         "settlement": offer.settlement,
         "period": offer.period,
         "remark": offer.remark,
-        "email_time": offer.email_time,
+        "email_time": emailTime,
         "email_users": offer.email_users,
         "email_tempalte": offer.email_tempalte
     }
@@ -192,7 +202,8 @@ def updateOffer():
         flag = data["flag"]
         if offer is not None:
             try:
-                offer.updateTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                offer.updateTime = now+datetime.timedelta(hours=8)
                 offer.status = data["status"] if data["status"] != "" else offer.status
                 offer.contract_type = data["contract_type"] if data["contract_type"] != "" else offer.contract_type
                 offer.contract_scale = float(data["contract_scale"]) if data["contract_scale"] != "" else offer.contract_scale
@@ -368,6 +379,7 @@ def country():
     print count
 
 #导入国家对应的时间
+import time
 @offers.route("/api/country_time", methods=["POST","GET"])
 def importCountry():
     if request.method == "POST":
@@ -382,39 +394,35 @@ def importCountry():
         table = data.sheets()[0]
         nrows = table.nrows
         ncols = table.ncols
-        colnames = table.row_values(0)
-        # print table.row_values(2)[0]
-        # print table.row_values(2)[1]
-
         data = []
         for rownum in range(1,nrows):
             date = []
-            time = []
+            timea = []
             for col in range(1,ncols):
-                time.append(table.row_values(0)[col])
+                timea.append(xlrd.xldate.xldate_as_datetime(table.row_values(0)[col],1).strftime("%Y-%m-%d"))
                 date.append(table.row_values(rownum)[col])
             result = {
                 "country": table.row_values(rownum)[0],
                 "date": date,
-                "time":time
+                "time":timea
             }
             data += [result]
+        for i in data:
+            for j in range(len(i["time"])):
+                time_coun = i["time"][j]
+                price = i["date"][j]
+                country = i['country']
+                coun = Country.query.filter_by(shorthand=country).first()
+                timePrice = TimePrice(coun.id,time_coun,price)
+                db.session.add(timePrice)
+                db.session.commit()
+                db.create_all()
+
         response = {
             "code": 200,
             "data": data
         }
         return json.dumps(response)
-        # tables = []
-        # for rownum in range(1,nrows):
-        #     row = table.row_values(rownum)
-        #     if row:
-        #         app = {}
-        #         for i in range(len(colnames)):
-        #             app[colnames[i]] = row[i]
-        #         tables.append(app)
-        #
-        # for row in tables:
-        #     print row
 
 @offers.route('/static/<path:filename>')
 def static_file_for_console(filename):
