@@ -1,57 +1,57 @@
 # -*- coding: utf-8 -*-
 import base64
 
-from flask import Flask, Blueprint, request, session, url_for, redirect, render_template
+from flask import Flask, Blueprint, request, session, g
+from flask.ext.login import login_user, logout_user, current_user, login_required
 import json
 
 from main import db
-from main.models import User
-from has_permission import Permission
+from main.models import User, Group
 
 users = Blueprint('users', __name__)
 
 
-@Permission.check(model='users', operate=['query'])
-@users.route('/register', methods=['POST', 'GET'])
+@users.route('/api/user/create', methods=['POST', 'GET'])
 def create_user():
     if request.method == "POST":
-        print request.data
         data = request.get_json(force=True)
-        session["name"] = data["name"]
         user = User(data["name"], data["email"], base64.encodestring(data["passwd"]), data["phone"])
         db.session.add(user)
         db.session.commit()
         db.create_all()
-        return json.dumps({"code": "200", "message": session["name"]})
-    elif request.method == "GET":
-        if 'name' in session:
-            return redirect(url_for('index'))
-        else:
-            return render_template('login.html')
+        session["user_id"] = db.session.query(User).filter_by(name=data["name"]).first().id
+        return json.dumps({"code": "200", "message": "success", "results": session["user_id"]})
+    return json.dumps({"code": "500", "message": "request method error"})
 
 
-@users.route('/login', methods=['POST', 'GET'])
+@users.route('/api/user/login', methods=['POST', 'GET'])
 def login_in():
     if request.method == "POST":
         data = request.get_json(force=True)
         user = db.session.query(User).filter_by(name=data["name"]).first()
+        user_id = db.session.query(User).filter_by(name=data["name"]).first().id
         if data["passwd"] == base64.decodestring(user.passwd):
-            session["name"] = data["name"]
-            return session["name"]
+            session["user_id"] = user_id
+            return json.dumps({"code": "200", "message": "success", "results": session["name"]})
         else:
-            return 'passwd or username error'
+            return json.dumps({"code": "500", "message": "password error!"})
 
 
-@users.route('/login', methods=['POST', 'GET'])
+@users.route('/api/user/logout', methods=['POST', 'GET'])
 def login_out():
-    del session['name']
-    return redirect(url_for('index'))
+    if request.method == "POST":
+        session.pop('user_id', None)
+        return json.dumps({"code": "200", "message": "success"})
+    return json.dumps({"code": "500", "message": "request method error"})
 
 
-    # @users.route('/select', methods=['POST', 'GET'])
-    # def select():
-    #     if request.method == "POST":
-    #         data = request.get_json(force=True)
-    #         name = data["name"]
-    #         user = db.session.query(Users).filter_by(name=name).first()
-    #         return user.name
+@users.route('/api/group/create', methods=['POST', 'GET'])
+def create_group():
+    if request.method == "POST":
+        data = request.get_json(force=True)
+        group = Group(data["name"])
+        db.session.add(group)
+        db.session.commit()
+        db.create_all()
+        return json.dumps({"code": "200", "message": "success"})
+    return json.dumps({"code": "500", "message": "request method error"})
