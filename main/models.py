@@ -116,7 +116,7 @@ class Offer(db.Model):
     updateTime = db.Column(db.String(100),nullable=False)
     historys = db.relationship('History', backref='offer', lazy='dynamic')
 
-    def __init__(self, user_id,customer_id,status,contract_type,contract_num,contract_scale,os,package_name,app_name,app_type,preview_link,track_link,material,startTime,endTime,platform,country,price,daily_budget,daily_type,total_budget,total_type,distribution,authorized,named_rule,KPI,settlement,period,remark,email_time,email_users,email_tempalte,createdTime,updateTime):
+    def __init__(self, user_id,customer_id,status="active",contract_type="cpa",contract_num=None,contract_scale=0,os=None,package_name=None,app_name=None,app_type=None,preview_link=None,track_link=None,material="yes",startTime=None,endTime=None,platform=None,country=None,price=0,daily_budget=0,daily_type="install",total_budget=0,total_type="cost",distribution=None,authorized=None,named_rule=None,KPI=None,settlement=None,period=None,remark=None,email_time=0,email_users=None,email_tempalte=1,createdTime=None,updateTime=None):
         self.user_id = user_id
         self.customer_id = customer_id
         self.status = status
@@ -163,7 +163,7 @@ class History(db.Model):
     status = db.Column(db.String(100), nullable=False)
     createdTime = db.Column(db.String(100), nullable=False)
     country = db.Column(db.String(100), nullable=False)
-    country_price = db.Column(db.Float, nullable=True)
+    country_price = db.Column(db.Float, nullable=False)
     price = db.Column(db.Float, default=0)
     daily_budget = db.Column(db.Float, default=0)  # 最高日预算
     daily_type = db.Column(db.String(100), nullable=True)
@@ -197,6 +197,7 @@ class History(db.Model):
 
 #国家编码
 class Country(db.Model):
+    __tablename__ = 'country'
     id = db.Column(db.Integer, primary_key=True)
     shorthand = db.Column(db.String(100),nullable=False)  #两位字母简写
     british = db.Column(db.String(100),nullable=False)   #英文全称
@@ -209,3 +210,18 @@ class Country(db.Model):
 
     def __repr__(self):
         return '<Country {}>'.format(self.id)
+
+class TimePrice(db.Model):
+    __tablename__ = 'timePrice'
+    id = db.Column(db.Integer, primary_key=True)
+    country_id = db.Column(db.Integer, db.ForeignKey('country.id'))
+    date = db.Column(db.String(100), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+
+    def __init__(self,country_id, date, price):
+        self.country_id = country_id
+        self.date = date
+        self.price = price
+
+    def __repr__(self):
+        return '<TimePrice {}>'.format(self.id)

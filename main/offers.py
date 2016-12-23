@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from flask import Blueprint, request
+from flask import Blueprint, request, render_template,safe_join, Response, send_file,make_response
 from main import db
 from models import Offer, History, User, Customers, Country
 import json
+import os
 import datetime, time
 import xlrd
+import tempfile
+from sqlalchemy import desc
 
 offers = Blueprint('offers', __name__)
-
-# @offers.route('/',methods=["GET"])
-# def index():
-#     return
 
 @offers.route('/api/customer_select', methods=['POST','GET'])
 def customerSelect():
@@ -59,18 +58,21 @@ def countrySelect():
 def createOffer():
     if request.method == "POST":
         data = request.get_json(force=True)
-        data["createdTime"] = datetime.datetime.now().strftime("%Y-%m-%d")
+        createdTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         email_time = "2016-12-19 "+data["email_time"]+":00"
-        data["email_time"] = time.mktime(time.strptime(email_time,'%Y-%m-%d %H:%M:%S'))
+        emailTime = float(time.mktime(time.strptime(email_time,'%Y-%m-%d %H:%M:%S')))
+        userName = data["user_id"]
+        user = User.query.filter_by(User.name==userName).first()
+        userId = int(user.id)
 
-        offer = Offer(int(data["user_id"]),int(data["customer_id"]),data["status"],data["contract_type"],data["contract_num"],float(data["contract_scale"]),data["os"],data["package_name"],data["app_name"],data["app_type"].encode('utf-8'),data["preview_link"],data["track_link"],data["material"],data["startTime"],data["endTime"],data["platform"],data["country"],float(data["price"]),float(data["daily_budget"]),data["daily_type"],float(data["total_budget"]),data["total_type"],data["distribution"],data["authorized"],data["named_rule"],data["KPI"].encode('utf-8'),data["settlement"].encode('utf-8'),data["period"].encode('utf-8'),data["remark"].encode('utf-8'),data["email_time"],data["email_users"],data["email_tempalte"],data["createdTime"],data["createdTime"])
+        offer = Offer(userId,int(data["customer_id"]),data["status"],data["contract_type"],data["contract_num"],float(data["contract_scale"]),data["os"],data["package_name"],data["app_name"],data["app_type"].encode('utf-8'),data["preview_link"],data["track_link"],data["material"],data["startTime"],data["endTime"],data["platform"],data["country"],float(data["price"]),float(data["daily_budget"]),data["daily_type"],float(data["total_budget"]),data["total_type"],data["distribution"],data["authorized"],data["named_rule"],data["KPI"].encode('utf-8'),data["settlement"].encode('utf-8'),data["period"].encode('utf-8'),data["remark"].encode('utf-8'),emailTime,data["email_users"],int(data["email_tempalte"]),createdTime,createdTime)
         try:
             db.session.add(offer)
             db.session.commit()
             db.create_all()
 
             for i in data['country_detail']:
-                history = History(offer.id,int(data["user_id"]),"default",data["createdTime"],status=data["status"],country=i["country"],country_price=i["price"],price=data["price"],daily_budget=float(data["daily_budget"]),daily_type=data["daily_type"],total_budget=float(data["total_budget"]),total_type=data["total_type"],KPI=data["KPI"],contract_type=data["contract_type"],contract_scale=float(data["contract_scale"]))
+                history = History(offer.id,userId,"default",createdTime,status=data["status"],country=i["country"],country_price=i["price"],price=data["price"],daily_budget=float(data["daily_budget"]),daily_type=data["daily_type"],total_budget=float(data["total_budget"]),total_type=data["total_type"],KPI=data["KPI"],contract_type=data["contract_type"],contract_scale=float(data["contract_scale"]))
                 db.session.add(history)
                 db.session.commit()
                 db.create_all()
@@ -82,20 +84,104 @@ def createOffer():
 @offers.route('/api/offer_show',methods=["POST","GET"])
 def offerShow():
     offers = Offer.query.all()
+    result = []
     for i in offers:
-        userId = i.user_id
-        user = User.query.filter_by(id==userId).first()
-        userName = user.name  #销售名字
         customerId = i.customer_id
-        customer = Customers.query.filter_by(id==customerId).first()
+        customer = Customers.query.filter_by(id=customerId).first()
         customerName = customer.company_name   #客户名称
         status = i.status
         contract_type = i.contract_type
-        if contract_type != "cpa":
-            contract_scale = 0
-        else:
-            contract_scale = i.contract_scale
+        os = i.os
+        app_name = i.app_name
+        data = {
+            "offer_id": i.id,
+            "status": status,
+            "contract_type": contract_type,
+            "os": os,
+            "customer_id": customerName,
+            "app_name": app_name,
+            "startTime": i.startTime,
+            "endTime": i.endTime,
+            "country": i.country,
+            "price": i.price,
+            "updateTime": i.updateTime
+        }
+        result += [data]
+    response = {
+        "code": 200,
+        "result": result,
+        "message": "success"
+    }
+    return json.dumps(response)
 
+@offers.route('/api/offer_detail/<id>', methods=["GET"])
+def offerDetail(id):
+    offer = Offer.query.filter_by(id=int(id)).first()
+    customerId = offer.customer_id
+    customer = Customers.query.filter_by(id=customerId).first()
+    userId = offer.user_id
+    user = User.query.filter_by(id=userId).first()
+    contract_type = offer.contract_type
+    if contract_type != "cpa":
+        contract_scale = 0
+    else:
+        contract_scale = offer.contract_scale
+    result = {
+        "customer_id": customer.company_name,
+        "status": offer.status,
+        "contract_scale": contract_scale,
+        "contract_num": offer.contract_num,
+        "user_id": user.name,
+        "os": offer.os,
+        "package_name": offer.package_name,
+        "app_name": offer.app_name,
+        "app_type": offer.app_type,
+        "preview_link": offer.preview_link,
+        "track_link": offer.track_link,
+        "material": offer.material,
+        "startTime": offer.startTime,
+        "endTime": offer.endTime,
+        "platform": offer.platform,
+        "country": offer.country,
+        "price": offer.price,
+        "daily_budget": offer.daily_budget,
+        "daily_type": offer.daily_type,
+        "total_budget": offer.total_budget,
+        "total_type": offer.total_type,
+        "distribution": offer.distribution,
+        "authorized": offer.authorized,
+        "named_rule": offer.named_rule,
+        "KPI": offer.KPI,
+        "settlement": offer.settlement,
+        "period": offer.period,
+        "remark": offer.remark,
+        "email_time": offer.email_time,
+        "email_users": offer.email_users,
+        "email_tempalte": offer.email_tempalte
+    }
+    historties = History.query.filter(History.offer_id==id,History.country != "").all()
+    countries = []
+    for i in historties:
+        country = i.country
+        countries.append(country)
+    countries = list(set(countries))
+    country_detail = []
+    for i in countries:
+        historty = History.query.filter(History.offer_id==id, History.country == i).order_by(desc(History.createdTime)).first()
+        country = historty.country
+        country_price = historty.country_price
+        detail = {
+            "country": country,
+            "price": country_price
+        }
+        country_detail += [detail]
+    result["country_detail"] = country_detail
+    response = {
+        "code": 200,
+        "result": result,
+        "message": "success"
+    }
+    return json.dumps(response)
 
 @offers.route('/api/update_offer', methods=["POST","GET"])
 def updateOffer():
@@ -105,7 +191,7 @@ def updateOffer():
         flag = data["flag"]
         if offer is not None:
             try:
-                offer.updateTime = datetime.datetime.now().strftime("%Y-%m-%d")
+                offer.updateTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 offer.status = data["status"] if data["status"] != "" else offer.status
                 offer.contract_type = data["contract_type"] if data["contract_type"] != "" else offer.contract_type
                 offer.contract_scale = float(data["contract_scale"]) if data["contract_scale"] != "" else offer.contract_scale
@@ -120,12 +206,12 @@ def updateOffer():
                 db.session.commit()
                 if "country_detail" in flag:
                     for i in data['country_detail']:
-                        history = History(offer.id, offer.user_id, "update", datetime.datetime.now().strftime("%Y-%m-%d"), country=i["country"], country_price=i["price"],price=float(data["price"]) if data["price"] != "" else 0,status=data["status"], daily_budget=float(data["daily_budget"]) if data["daily_budget"] != "" else 0,daily_type = data["daily_type"], total_budget=float(data["total_budget"]) if data['total_budget']!="" else 0,total_type=data["total_type"],KPI=data["KPI"],contract_type=data["contract_type"],contract_scale=float(data["contract_scale"]))
+                        history = History(offer.id, offer.user_id, "update", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), country=i["country"], country_price=i["price"],price=float(data["price"]) if data["price"] != "" else 0,status=data["status"], daily_budget=float(data["daily_budget"]) if data["daily_budget"] != "" else 0,daily_type = data["daily_type"], total_budget=float(data["total_budget"]) if data['total_budget']!="" else 0,total_type=data["total_type"],KPI=data["KPI"],contract_type=data["contract_type"],contract_scale=float(data["contract_scale"]))
                         db.session.add(history)
                         db.session.commit()
                         db.create_all()
                 else:
-                    history = History(offer.id, offer.user_id, "update", datetime.datetime.now().strftime("%Y-%m-%d"),price=float(data["price"]) if data["price"] != "" else 0,status=data["status"], daily_budget=float(data["daily_budget"]) if data["daily_budget"] != "" else 0,daily_type = data["daily_type"], total_budget=float(data["total_budget"]) if data['total_budget']!="" else 0,total_type=data["total_type"],KPI=data["KPI"],contract_type=data["contract_type"],contract_scale=float(data["contract_scale"])if data["contract_scale"] != "" else 0)
+                    history = History(offer.id, offer.user_id, "update", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),price=float(data["price"]) if data["price"] != "" else 0,status=data["status"], daily_budget=float(data["daily_budget"]) if data["daily_budget"] != "" else 0,daily_type = data["daily_type"], total_budget=float(data["total_budget"]) if data['total_budget']!="" else 0,total_type=data["total_type"],KPI=data["KPI"],contract_type=data["contract_type"],contract_scale=float(data["contract_scale"])if data["contract_scale"] != "" else 0)
                     db.session.add(history)
                     db.session.commit()
                     db.create_all()
@@ -279,3 +365,57 @@ def country():
         count += 1
 
     print count
+
+#导入国家对应的时间
+@offers.route("/api/country_time", methods=["POST","GET"])
+def importCountry():
+    if request.method == "POST":
+        # file_url = request.files["file"][0]
+        # tempfd, tempname = tempfile.mkstemp('.xls')
+        # os.write(tempfd, file_url['body'])
+        tempname = "/Users/liyin/Desktop/time.xlsx"
+        try:
+            data = xlrd.open_workbook(tempname)
+        except Exception,e:
+            print e
+        table = data.sheets()[0]
+        print table
+        nrows = table.nrows
+        ncols = table.ncols
+        colnames = table.row_values(0)
+        print colnames
+        print nrows
+        print ncols
+        print "========"
+        for rownum in range(2,nrows):
+            for col in range(1,ncols):
+
+                print table.row_values(1)[col]
+
+        tables = []
+        # for rownum in range(1,nrows):
+        #     row = table.row_values(rownum)
+        #     if row:
+        #         app = {}
+        #         for i in range(len(colnames)):
+        #             app[colnames[i]] = row[i]
+        #         tables.append(app)
+        #
+        # for row in tables:
+        #     print row
+
+@offers.route('/static/<path:filename>')
+def static_file_for_console(filename):
+    filename = safe_join("../static", filename)
+    if not os.path.isabs(filename):
+        filename = os.path.join(offers.root_path, filename)
+    if not os.path.isfile(filename):
+        return Response(), 404
+    return send_file(filename, conditional=True)
+
+@offers.route('/<path>')
+def today(path):
+    base_dir = os.path.dirname(__file__)
+    resp = make_response(open(os.path.join(base_dir, path)))
+    resp.headers["Content-type"]="application/json;charset=UTF-8"
+    return resp
