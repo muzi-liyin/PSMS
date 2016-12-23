@@ -103,7 +103,7 @@ def offerShow():
             "app_name": app_name,
             "startTime": i.startTime,
             "endTime": i.endTime,
-            "country": i.country,
+            "country": (i.country).decode("utf-8"),
             "price": i.price,
             "updateTime": i.updateTime
         }
@@ -142,6 +142,7 @@ def offerDetail(id):
         "status": offer.status,
         "contract_scale": contract_scale,
         "contract_num": offer.contract_num,
+        "contract_type": offer.contract_type,
         "user_id": user.name,
         "os": offer.os,
         "package_name": offer.package_name,
@@ -153,7 +154,7 @@ def offerDetail(id):
         "startTime": offer.startTime,
         "endTime": offer.endTime,
         "platform": platform,
-        "country": offer.country,
+        "country": (offer.country).decode("utf-8"),
         "price": offer.price,
         "daily_budget": offer.daily_budget,
         "daily_type": offer.daily_type,
