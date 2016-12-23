@@ -128,14 +128,6 @@ def offerDetail(id):
     else:
         contract_scale = offer.contract_scale
     plate = offer.platform
-    if len(plate) > 12:
-        platform = []
-        first = plate.split('[]',1)[0].split(',',1)[0].split('[')[1]
-        second = plate.split('[]',1)[0].split(',',1)[1].split(']')[0]
-        platform.append(first)
-        platform.append(second)
-    else:
-        platform = offer.platform
     emailTime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(offer.email_time))[11:16]
     result = {
         "customer_id": customer.company_name,
@@ -153,7 +145,7 @@ def offerDetail(id):
         "material": offer.material,
         "startTime": offer.startTime,
         "endTime": offer.endTime,
-        "platform": platform,
+        "platform": str(plate),
         "country": str(offer.country),
         "price": offer.price,
         "daily_budget": offer.daily_budget,
