@@ -20,8 +20,8 @@ def customerSelect():
         customers = Customers.query.filter(Customers.company_name.ilike('%'+data["name"]+'%')).all()
         for i in customers:
             data = {
-                "customer_id": i.id,
-                "company_name": i.company_name
+                "id": i.id,
+                "text": i.company_name
             }
             result += [data]
         response = {
