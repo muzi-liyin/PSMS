@@ -59,13 +59,14 @@ def createOffer():
     if request.method == "POST":
         data = request.get_json(force=True)
         createdTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        updateTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         email_time = "2016-12-19 "+data["email_time"]+":00"
         emailTime = float(time.mktime(time.strptime(email_time,'%Y-%m-%d %H:%M:%S')))
-        userName = data["user_id"]
+        userName = data["user_id"].encode('utf-8')
         user = User.query.filter_by(name=userName).first()
         userId = int(user.id)
 
-        offer = Offer(userId,int(data["customer_id"]),data["status"],data["contract_type"],data["contract_num"],float(data["contract_scale"]),data["os"],data["package_name"],data["app_name"],data["app_type"].encode('utf-8'),data["preview_link"],data["track_link"],data["material"],data["startTime"],data["endTime"],data["platform"],data["country"],float(data["price"]),float(data["daily_budget"]),data["daily_type"],float(data["total_budget"]),data["total_type"],data["distribution"],data["authorized"],data["named_rule"],data["KPI"].encode('utf-8'),data["settlement"].encode('utf-8'),data["period"].encode('utf-8'),data["remark"].encode('utf-8'),emailTime,data["email_users"],int(data["email_tempalte"]),createdTime,createdTime)
+        offer = Offer(userId,int(data["customer_id"]),data["status"],data["contract_type"],data["contract_num"],float(data["contract_scale"]),data["os"],data["package_name"],data["app_name"],data["app_type"].encode('utf-8'),data["preview_link"],data["track_link"],data["material"],data["startTime"],data["endTime"],str(data["platform"]),str(data["country"]),float(data["price"]),float(data["daily_budget"]),data["daily_type"],float(data["total_budget"]),data["total_type"],data["distribution"],data["authorized"],data["named_rule"],data["KPI"].encode('utf-8'),data["settlement"].encode('utf-8'),data["period"].encode('utf-8'),data["remark"].encode('utf-8'),emailTime,str(data["email_users"]),int(data["email_tempalte"]),createdTime,updateTime)
         try:
             db.session.add(offer)
             db.session.commit()
@@ -384,17 +385,26 @@ def importCountry():
         colnames = table.row_values(0)
         # print table.row_values(2)[0]
         # print table.row_values(2)[1]
-        date = []
+
         data = []
-        for rownum in range(2,nrows):
+        for rownum in range(1,nrows):
+            date = []
+            time = []
             for col in range(1,ncols):
+                time.append(table.row_values(0)[col])
                 date.append(table.row_values(rownum)[col])
             result = {
                 "country": table.row_values(rownum)[0],
-                "date": date
+                "date": date,
+                "time":time
             }
-
-        tables = []
+            data += [result]
+        response = {
+            "code": 200,
+            "data": data
+        }
+        return json.dumps(response)
+        # tables = []
         # for rownum in range(1,nrows):
         #     row = table.row_values(rownum)
         #     if row:
