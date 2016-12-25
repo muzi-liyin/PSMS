@@ -418,9 +418,15 @@ def importCountry():
 
         response = {
             "code": 200,
-            "data": data
+            "data": data,
+            "message": "success"
         }
-        return json.dumps(response)
+    else:
+        response = {
+            "code": 500,
+            "message": "fail"
+        }
+    return json.dumps(response)
 
 @offers.route("/api/country_time_show", methods=["POST","GET"])
 def showCountryTime():
@@ -465,23 +471,10 @@ def showCountryTime():
                     "price": timePrice.price
                 }
             else:
-                try:
-                    before_list = []
-                    index = dateList.index(i)
-                    for j in range(0,index):
-                        if dateList[j] in dateCurrent:
-                            before_list.append(dateList[j])
-                    before_date = before_list[-1]
-                    timePrice = TimePrice.query.filter_by(country_id=countryId, date=before_date).first()
-                    detail = {
-                        "date": i,
-                        "price": timePrice.price
-                    }
-                except Exception as e:
-                    detail = {
-                        "date": "",
-                        "price": ""
-                    }
+                detail = {
+                    "date": i,
+                    "price": ""
+                }
             result += [detail]
         response = {
             "code": 200,
@@ -490,8 +483,36 @@ def showCountryTime():
         }
         return json.dumps(response)
 
-# @offers.route('/api/country_time_update')
-# def updateContryTime():
+@offers.route('/api/country_time_update', methods=["POST","GET"])
+def updateContryTime():
+    data = request.get_json(force=True)
+    result = data["result"]
+    countryName = data["country"]
+    country = Country.query.filter_by(shorthand=countryName).first()
+    countryId = country.id
+    for i in result:
+        if i["price"] != "":
+            timePrice = TimePrice.query.filter_by(country_id=countryId, date=i["date"]).first()
+            if timePrice:
+                timePrice.price = i["price"]
+                try:
+                    db.session.add(timePrice)
+                    db.session.commit()
+                except Exception as e:
+                    print e
+                    return json.dumps({"code": 500,"message":"fail"})
+            else:
+                timePriceNew = TimePrice(countryId, i["date"], i["price"])
+                try:
+                    db.session.add(timePriceNew)
+                    db.session.commit()
+                    db.create_all()
+                except Exception as e:
+                    print e
+                    return json.dumps({"code": 500, "message": "fail"})
+        else:
+            pass
+    return json.dumps({"code":200, "message": "success"})
 
 
 @offers.route('/static/<path:filename>')
