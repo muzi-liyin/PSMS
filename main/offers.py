@@ -199,13 +199,36 @@ def updateOffer():
                 offer.status = data["status"] if data["status"] != "" else offer.status
                 offer.contract_type = data["contract_type"] if data["contract_type"] != "" else offer.contract_type
                 offer.contract_scale = float(data["contract_scale"]) if data["contract_scale"] != "" else offer.contract_scale
-                offer.country = data["country"] if data["country"] != "" else offer.country
+                offer.contract_num = data["contract_num"] if data["contract_num"] != "" else offer.contract_num
+                offer.os = data["os"] if data["os"] != "" else offer.os
+                offer.package_name = data["package_name"] if data["package_name"] != "" else offer.package_name
+                offer.app_name = data["app_name"] if data["app_name"] != "" else offer.app_name
+                offer.app_type = data["app_type"] if data["app_type"] != "" else offer.app_type
+                offer.preview_link = data["preview_link"] if data["preview_link"] != "" else offer.preview_link
+                offer.track_link = data["track_link"] if data["track_link"] != "" else offer.track_link
+                offer.material = data["material"] if data["material"] != "" else offer.material
+                offer.startTime = data["startTime"] if data["startTime"] != "" else offer.startTime
+                offer.endTime = data["endTime"] if data["endTime"] != "" else offer.endTime
+                offer.platform = str(data["platform"]) if str(data["platform"]) != "" else offer.platform
+                offer.country = str(data["country"]) if str(data["country"]) != "" else offer.country
                 offer.price = float(data["price"]) if data["price"] != "" else offer.price
                 offer.daily_budget = float(data["daily_budget"]) if data["daily_budget"] != "" else offer.daily_budget
                 offer.daily_type = data["daily_type"] if data["daily_type"] != "" else offer.daily_type
                 offer.total_budget = float(data["total_budget"]) if data["total_budget"] != "" else offer.total_budget
                 offer.total_type = data["total_type"] if data["total_type"] != "" else offer.total_type
+                offer.distribution = data["distribution"] if data["distribution"] != "" else offer.distribution
+                offer.authorized = data["authorized"] if data['authorized'] != "" else offer.authorized
+                offer.named_rule = data["named_rule"] if data["named_rule"] != "" else offer.named_rule
                 offer.KPI = data["KPI"].encode('utf-8') if data["KPI"] != "" else offer.KPI
+                offer.settlement = data['settlement'].encode('utf-8') if data["settlement"] != "" else offer.settlement
+                offer.period = data["period"].encode("utf-8") if data["period"] != "" else offer.period
+                offer.remark = data["remark"].encode("utf-8") if data["remark"] != "" else offer.remark
+                if data["email_time"] != "":
+                    email_time = "2016-12-19 " + data["email_time"] + ":00"
+                    emailTime = float(time.mktime(time.strptime(email_time, '%Y-%m-%d %H:%M:%S')))
+                    offer.email_time = emailTime
+                offer.email_users = str(data["email_users"]) if str(data["email_users"]) != "" else offer.email_users
+                offer.email_tempalte = data["email_tempalte"] if data["email_tempalte"] != "" else offer.email_tempalte
                 db.session.add(offer)
                 db.session.commit()
                 if "country_detail" in flag:
