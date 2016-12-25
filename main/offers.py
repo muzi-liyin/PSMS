@@ -378,7 +378,7 @@ def importCountry():
         file_url = request.files["file"][0]
         tempfd, tempname = tempfile.mkstemp('.xls')
         os.write(tempfd, file_url['body'])
-        tempname = "/Users/liyin/Desktop/time.xlsx"
+        # tempname = "/Users/liyin/Desktop/time.xlsx"
         try:
             data = xlrd.open_workbook(tempname)
         except Exception,e:
