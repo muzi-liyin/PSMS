@@ -375,18 +375,20 @@ def country():
 @offers.route("/api/country_time", methods=["POST","GET"])
 def importCountry():
     if request.method == "POST":
-        print "hello"
-        file_url = request.files["file"]
-        print file_url
-        tempfd, tempname = tempfile.mkstemp('.xls')
-        os.write(tempfd, file_url['FileStorage'])
-        # tempname = "/Users/liyin/Desktop/time.xlsx"
+        basedir = os.path.abspath(os.path.dirname(__file__))
+        file_dir = os.path.join(basedir, 'upload')
+        if not os.path.exists(file_dir):
+            os.makedirs(file_dir)
+        unix_time = int(time.time())
+        f = request.files['file']
+        new_filename = str(unix_time) + '.xlsx'  # 修改了上传的文件名
+        f.save(os.path.join(file_dir, new_filename))  # 保存文件到upload目录
         try:
-            data = xlrd.open_workbook(tempname)
+            data = xlrd.open_workbook(file_dir+"/"+new_filename)
         except Exception,e:
             print e
         table = data.sheets()[0]
-        print table
+
         nrows = table.nrows
         ncols = table.ncols
         data = []
@@ -402,6 +404,7 @@ def importCountry():
                 "time":timea
             }
             data += [result]
+
         for i in data:
             for j in range(len(i["time"])):
                 time_coun = i["time"][j]
@@ -462,19 +465,21 @@ def showCountryTime():
                     "price": timePrice.price
                 }
             else:
-                before_list = []
-                index = dateList.index(i)
-                for j in range(0,index):
-                    if dateList[j] in dateCurrent:
-                        before_list.append(dateList[j])
-                before_date = before_list[-1]
-                timePrice = TimePrice.query.filter_by(country_id=countryId, date=before_date).first()
-                detail = {
-                    "date": i,
-                    "price": timePrice.price
-                }
-            result += [detail]
-
+                try:
+                    before_list = []
+                    index = dateList.index(i)
+                    for j in range(0,index):
+                        if dateList[j] in dateCurrent:
+                            before_list.append(dateList[j])
+                    before_date = before_list[-1]
+                    timePrice = TimePrice.query.filter_by(country_id=countryId, date=before_date).first()
+                    detail = {
+                        "date": i,
+                        "price": timePrice.price
+                    }
+                    result += [detail]
+                except Exception as e:
+                    result =[]
         response = {
             "code": 200,
             "result": result,
