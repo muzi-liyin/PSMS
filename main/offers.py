@@ -375,7 +375,9 @@ def country():
 @offers.route("/api/country_time", methods=["POST","GET"])
 def importCountry():
     if request.method == "POST":
-        file_url = request.files["file"][0]
+        print "hello"
+        file_url = request.files["file"]
+        print file_url
         tempfd, tempname = tempfile.mkstemp('.xls')
         os.write(tempfd, file_url['body'])
         # tempname = "/Users/liyin/Desktop/time.xlsx"
@@ -384,6 +386,7 @@ def importCountry():
         except Exception,e:
             print e
         table = data.sheets()[0]
+        print table
         nrows = table.nrows
         ncols = table.ncols
         data = []
