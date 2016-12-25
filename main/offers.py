@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from main.has_permission import *
 from flask import Blueprint, request
 from main import db
 from models import Offer, History, User, Customers, Country
