@@ -477,9 +477,12 @@ def showCountryTime():
                         "date": i,
                         "price": timePrice.price
                     }
-                    result += [detail]
                 except Exception as e:
-                    result =[]
+                    detail = {
+                        "date": "",
+                        "price": ""
+                    }
+            result += [detail]
         response = {
             "code": 200,
             "result": result,
