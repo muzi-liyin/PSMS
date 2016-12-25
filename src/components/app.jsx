@@ -9,7 +9,8 @@ var App = React.createClass({
         console.log("在渲染前调用,在客户端也在服务端。"+ this.state.opacity)
     },
     componentWillReceiveProps(){
-        console.log("点击切换路由可以写这里");
+        //location.reload();
+        //console.log("点击切换路由可以写这里");
     },
     componentDidMount(){
         return;
