@@ -372,13 +372,12 @@ def country():
     print count
 
 #导入国家对应的时间
-import time
 @offers.route("/api/country_time", methods=["POST","GET"])
 def importCountry():
     if request.method == "POST":
-        # file_url = request.files["file"][0]
-        # tempfd, tempname = tempfile.mkstemp('.xls')
-        # os.write(tempfd, file_url['body'])
+        file_url = request.files["file"][0]
+        tempfd, tempname = tempfile.mkstemp('.xls')
+        os.write(tempfd, file_url['body'])
         tempname = "/Users/liyin/Desktop/time.xlsx"
         try:
             data = xlrd.open_workbook(tempname)
@@ -403,7 +402,7 @@ def importCountry():
         for i in data:
             for j in range(len(i["time"])):
                 time_coun = i["time"][j]
-                price = i["date"][j]
+                price = '%0.2f'%(i["date"][j])
                 country = i['country']
                 coun = Country.query.filter_by(shorthand=country).first()
                 timePrice = TimePrice(coun.id,time_coun,price)
@@ -416,6 +415,73 @@ def importCountry():
             "data": data
         }
         return json.dumps(response)
+
+@offers.route("/api/country_time_show", methods=["POST","GET"])
+def showCountryTime():
+    if request.method == "POST":
+        data = request.get_json(force=True)
+        date = data['date']
+        country = data["country"]
+        countries = Country.query.filter_by(shorthand=country).first()
+        countryId = countries.id
+        month = date.split("-",1)[1]
+        year = int(date.split('-',1)[0])
+        if month in ["01","03","05","07","08","10","12"]:
+            dateList = [date+"-01",date+"-02",date+"-03",date+"-04",date+"-05",date+"-06",date+"-07",date+"-08",date+"-09",date+"-10",date+"-11",date+"-12",date+"-13",date+"-14",date+"-15",date+"-16",date+"-17",date+"-18",date+"-19",date+"-20",date+"-21",date+"-22",date+"-23",date+"-24",date+"-25",date+"-26",date+"-27",date+"-28",date+"-29",date+"-30",date+"-31"]
+        elif month in ["04","06","09","11"]:
+            dateList = [date + "-01", date + "-02", date + "-03", date + "-04", date + "-05", date + "-06", date + "-07", date + "-08", date + "-09",date + "-10", date + "-11", date + "-12", date + "-13", date + "-14", date + "-15", date + "-16", date + "-17", date + "-18",date + "-19", date + "-20", date + "-21", date + "-22", date + "-23", date + "-24", date + "-25", date + "-26", date + "-27",date + "-28", date + "-29", date + "-30"]
+        else:
+            if year % 100 ==0 and year % 400 == 0:
+                dateList = [date + "-01", date + "-02", date + "-03", date + "-04", date + "-05", date + "-06", date + "-07", date + "-08",
+                            date + "-09", date + "-10", date + "-11", date + "-12", date + "-13", date + "-14", date + "-15", date + "-16",
+                            date + "-17", date + "-18", date + "-19", date + "-20", date + "-21", date + "-22", date + "-23", date + "-24",
+                            date + "-25", date + "-26", date + "-27", date + "-28", date + "-29"]
+            elif year % 100 !=0 and year % 4 == 0:
+                dateList = [date + "-01", date + "-02", date + "-03", date + "-04", date + "-05", date + "-06", date + "-07", date + "-08",
+                            date + "-09", date + "-10", date + "-11", date + "-12", date + "-13", date + "-14", date + "-15", date + "-16",
+                            date + "-17", date + "-18", date + "-19", date + "-20", date + "-21", date + "-22", date + "-23", date + "-24",
+                            date + "-25", date + "-26", date + "-27", date + "-28", date + "-29"]
+            else:
+                dateList = [date + "-01", date + "-02", date + "-03", date + "-04", date + "-05", date + "-06", date + "-07", date + "-08",
+                            date + "-09", date + "-10", date + "-11", date + "-12", date + "-13", date + "-14", date + "-15", date + "-16",
+                            date + "-17", date + "-18", date + "-19", date + "-20", date + "-21", date + "-22", date + "-23", date + "-24",
+                            date + "-25", date + "-26", date + "-27", date + "-28"]
+        result = []
+        dateCurrent = []
+        timePrices = TimePrice.query.filter(TimePrice.country_id==countryId).all()
+        for t in timePrices:
+            dateCurrent.append(t.date)
+        for i in dateList:
+            if i in dateCurrent:
+                timePrice = TimePrice.query.filter_by(country_id=countryId, date=i).first()
+                detail = {
+                    "date": i,
+                    "price": timePrice.price
+                }
+            else:
+                before_list = []
+                index = dateList.index(i)
+                for j in range(0,index):
+                    if dateList[j] in dateCurrent:
+                        before_list.append(dateList[j])
+                before_date = before_list[-1]
+                timePrice = TimePrice.query.filter_by(country_id=countryId, date=before_date).first()
+                detail = {
+                    "date": i,
+                    "price": timePrice.price
+                }
+            result += [detail]
+
+        response = {
+            "code": 200,
+            "result": result,
+            "message": "success"
+        }
+        return json.dumps(response)
+
+# @offers.route('/api/country_time_update')
+# def updateContryTime():
+
 
 @offers.route('/static/<path:filename>')
 def static_file_for_console(filename):
