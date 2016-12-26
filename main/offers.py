@@ -54,6 +54,24 @@ def countrySelect():
     else:
         return json.dumps({"code": 500, "message":"The request type wrong!"})
 
+@offers.route('/api/user_select', methods=["POST","GET"])
+def userSelect():
+    users = User.query.filter().all()
+    result = []
+    for i in users:
+        data = {
+            "id": i.id,
+            "name": i.name,
+            "email": i.email
+        }
+        result += [data]
+    response = {
+        "code": 200,
+        "result": result,
+        "message": "success"
+    }
+    return json.dumps(response)
+
 @offers.route('/api/create_offer', methods=['POST','GET'])
 def createOffer():
     if request.method == "POST":
@@ -62,18 +80,15 @@ def createOffer():
         updateTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")+datetime.timedelta(hours=8)
         email_time = "2016-12-19 "+data["email_time"]+":00"
         emailTime = float(time.mktime(time.strptime(email_time,'%Y-%m-%d %H:%M:%S')))
-        userName = data["user_id"].encode('utf-8')
-        user = User.query.filter_by(name=userName).first()
-        userId = int(user.id)
 
-        offer = Offer(userId,int(data["customer_id"]),data["status"],data["contract_type"],data["contract_num"],float(data["contract_scale"]),data["os"],data["package_name"],data["app_name"],data["app_type"].encode('utf-8'),data["preview_link"],data["track_link"],data["material"],data["startTime"],data["endTime"],str(data["platform"]),str(data["country"]),float(data["price"]),float(data["daily_budget"]),data["daily_type"],float(data["total_budget"]),data["total_type"],data["distribution"],data["authorized"],data["named_rule"],data["KPI"].encode('utf-8'),data["settlement"].encode('utf-8'),data["period"].encode('utf-8'),data["remark"].encode('utf-8'),emailTime,str(data["email_users"]),int(data["email_tempalte"]),createdTime,updateTime)
+        offer = Offer(int(data["user_id"]),int(data["customer_id"]),data["status"],data["contract_type"],data["contract_num"],float(data["contract_scale"]),data["os"],data["package_name"],data["app_name"],data["app_type"].encode('utf-8'),data["preview_link"],data["track_link"],data["material"],data["startTime"],data["endTime"],str(data["platform"]),str(data["country"]),float(data["price"]),float(data["daily_budget"]),data["daily_type"],float(data["total_budget"]),data["total_type"],data["distribution"],data["authorized"],data["named_rule"],data["KPI"].encode('utf-8'),data["settlement"].encode('utf-8'),data["period"].encode('utf-8'),data["remark"].encode('utf-8'),emailTime,str(data["email_users"]),int(data["email_tempalte"]),createdTime,updateTime)
         try:
             db.session.add(offer)
             db.session.commit()
             db.create_all()
 
             for i in data['country_detail']:
-                history = History(offer.id,userId,"default",createdTime,status=data["status"],country=i["country"],country_price=i["price"],price=data["price"],daily_budget=float(data["daily_budget"]),daily_type=data["daily_type"],total_budget=float(data["total_budget"]),total_type=data["total_type"],KPI=data["KPI"],contract_type=data["contract_type"],contract_scale=float(data["contract_scale"]))
+                history = History(offer.id,int(data["user_id"]),"default",createdTime,status=data["status"],country=i["country"],country_price=i["price"],price=data["price"],daily_budget=float(data["daily_budget"]),daily_type=data["daily_type"],total_budget=float(data["total_budget"]),total_type=data["total_type"],KPI=data["KPI"],contract_type=data["contract_type"],contract_scale=float(data["contract_scale"]))
                 db.session.add(history)
                 db.session.commit()
                 db.create_all()
