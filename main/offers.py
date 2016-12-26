@@ -171,7 +171,7 @@ def offerDetail(id):
         "contract_scale": contract_scale,
         "contract_num": offer.contract_num,
         "contract_type": offer.contract_type,
-        "user_id": user.name,
+        "user_id": user.id,
         "os": offer.os,
         "package_name": offer.package_name,
         "app_name": offer.app_name,
