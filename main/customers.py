@@ -19,7 +19,7 @@ def create_customer():
         customer_code = str(code).upper()[:8]
         if db.session.query(Customers).filter_by(company_name=data["company_name"]).first():
             return json.dumps({"code": "500", "message": "customer has exits"})
-        customer = Customers(customer_code, data["company_name"], data['company_address'], data['comment'],'Created')
+        customer = Customers(customer_code, data["company_name"], data['company_address'], data['comment'], 'Created')
         db.session.add(customer)
         db.session.commit()
         db.create_all()
@@ -40,7 +40,7 @@ def customer():
                 'company_address': customer.company_address,
                 'comment': customer.comment,
                 'last_datetime': str(customer.last_datetime),
-                'status':customer.status
+                'status': customer.status
             }
             msg_list += [data]
         created_list = []
