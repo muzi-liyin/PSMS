@@ -28,7 +28,7 @@ class Permission(object):
                         permission_list.append(
                             db.session.query(Permissions).filter_by(id=user_permission.permissions_id).first().name)
                     for model in models:
-                        print model
+                        # print model
                         if model not in permission_list:
                             return json.dumps(dict(code=403, message='no permission'))
                 return func(*args, **kw)

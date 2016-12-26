@@ -3,33 +3,13 @@ from datetime import datetime
 from main import db
 
 
-# 用户,角色关联
-# user_role = db.Table('user_role',
-# db.Column('id', db.Integer, primary_key=True),
-# db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-# db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
-# )
-# 角色,权限关联
-# role_permissions = db.Table('role_permissions',
-# db.Column('id', db.Integer, primary_key=True),
-# db.Column('role_id', db.Integer, db.ForeignKey('role.id')),
-# db.Column('permissions_id', db.Integer, db.ForeignKey('permissions.id'))
-# )
-# 用户,权限关联
-# user_permissions = db.Table('user_permissions',
-# db.Column('id', db.Integer, primary_key=True),
-# db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-# db.Column('permissions_id', db.Integer, db.ForeignKey('permissions.id'))
-# )
-
-
 # 用户,角色关联表
 class UserRole(db.Model):
     __tablename__ = 'user_role'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)  # , db.ForeignKey('user.id'))
-    role_id = db.Column(db.Integer)  # , db.ForeignKey('role.id'))
+    user_id = db.Column(db.Integer)
+    role_id = db.Column(db.String(100), nullable=False)
 
     def __init__(self, user_id, role_id):
         self.user_id = user_id
@@ -41,8 +21,8 @@ class RolePermissions(db.Model):
     __tablename__ = 'role_permissions'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
-    role_id = db.Column(db.Integer)  # , db.ForeignKey('role.id'))
-    permissions_id = db.Column(db.Integer)  # , db.ForeignKey('permissions.id'))
+    role_id = db.Column(db.Integer)
+    permissions_id = db.Column(db.String(100), nullable=False)
 
     def __init__(self, role_id, permissions_id):
         self.role_id = role_id
@@ -54,8 +34,8 @@ class UserPermissions(db.Model):
     __tablename__ = 'user_permissions'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)  # , db.ForeignKey('user.id'))
-    permissions_id = db.Column(db.Integer)  # , db.ForeignKey('permissions.id'))
+    user_id = db.Column(db.Integer)
+    permissions_id = db.Column(db.String(100), nullable=False)
 
     def __init__(self, user_id, permissions_id):
         self.user_id = user_id
@@ -71,13 +51,6 @@ class User(db.Model):
     passwd = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
     last_datetime = db.Column(db.DateTime, default=datetime.now())
-
-    # roles = db.relationship('Role', backref='user',
-    #                             lazy='dynamic')
-
-    # roles = db.relationship('Role', secondary=UserRole,
-    #                        backref=db.backref('roles', lazy='dynamic'),
-    #                        lazy='dynamic')
 
     def __init__(self, name, email, passwd, phone):
         self.name = name
@@ -97,13 +70,6 @@ class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
 
-    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    # permissions = db.relationship('Permissions', backref='role',
-    #                             lazy='dynamic')
-    # permission = db.relationship('Permissions', secondary=RolePermissions,
-    #                               backref=db.backref('permission', lazy='dynamic'),
-    #                               lazy='dynamic')
-
     def __init__(self, name):
         self.name = name
 
@@ -113,12 +79,6 @@ class Permissions(db.Model):
     __tablename__ = 'permissions'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-
-    # role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
-
-    # users = db.relationship('User', secondary=UserPermissions,
-    #                        backref=db.backref('users', lazy='dynamic'),
-    #                        lazy='dynamic')
 
     def __init__(self, name):
         self.name = name
