@@ -81,8 +81,8 @@ def userSelect():
 def createOffer():
     if request.method == "POST":
         data = request.get_json(force=True)
-        createdTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + datetime.timedelta(hours=8)
-        updateTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + datetime.timedelta(hours=8)
+        createdTime = (datetime.datetime.now() + datetime.timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
+        updateTime = (datetime.datetime.now() + datetime.timedelta(hours=8)).strftime("%Y-%m-%d %H:%M:%S")
         email_time = "2016-12-19 " + data["email_time"] + ":00"
         emailTime = float(time.mktime(time.strptime(email_time, '%Y-%m-%d %H:%M:%S')))
 
