@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+from main.has_permission import *
+from flask import Blueprint, request, safe_join, Response, send_file, make_response
 
-from flask import Blueprint, request,safe_join, Response, send_file,make_response
 from main import db
 from models import Offer, History, User, Customers, Country, TimePrice
 import json
@@ -131,6 +132,7 @@ def offerShow():
     return json.dumps(response)
 
 @offers.route('/api/offer_detail/<id>', methods=["GET"])
+@Permission.check(models=['offer_query'])
 def offerDetail(id):
     offer = Offer.query.filter_by(id=int(id)).first()
     customerId = offer.customer_id
