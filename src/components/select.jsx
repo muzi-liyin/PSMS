@@ -12,7 +12,7 @@ var Select = React.createClass({
     },
     render(){
         return (
-           <select id={this.props.aa}   data-key={this.props.keyword}  className={this.props.className+" form-control"}> </select>
+           <select  data-key={this.props.keyword}  className={this.props.className+" form-control"}> </select>
         )
     }
 });
@@ -45,7 +45,7 @@ var AjaxSelect = React.createClass({
     },
     render(){
         return (
-            <select data-key={this.props.keyword}  className={this.props.className+" form-control"} > </select>
+            <select  data-key={this.props.keyword}  className={this.props.className+" form-control"} > </select>
         )
     }
 });

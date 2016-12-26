@@ -168,8 +168,8 @@ module.exports = (function ($) {
                                  '       <dt><strong>六</strong></dt>' +
                                  '   </dl>' +
                                  '   <div class="cal-buttons">' +
-                                 '      <button class="cal-cancel">取消</button>' +
-                                 '      <button class="cal-save">确定</button>' +
+                                 '      <button type="button" class="cal-cancel">取消</button>' +
+                                 '      <button type="button" class="cal-save">确定</button>' +
                                  '   </div>' +
                                  '</div>';
                 return html;

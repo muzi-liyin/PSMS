@@ -23,20 +23,24 @@ var CreateOffer = React.createClass({
             tfdq:[],
             country:"",
             date:"",
-            country_detail:[]
+            country_detail:[],
+            userId:[]
         };
     },
     uploadFile:function () {
         var _this = this;
         uploadFile("/api/country_time","post","import").then(function (data) {
-            $(".ajax_error").html(data.message);
-            $(".modal").modal("toggle");
-            $("#import").unbind().change(function () {
-                _this.uploadFile();
-            });
-        },function (data) {
-            $(".ajax_error").html(data.message);
-            $(".modal").modal("toggle");
+            var data = JSON.stringify(data);
+            if(data.code==200){
+                $(".ajax_error").html(data.message);
+                $(".modal").modal("toggle");
+                $("#import").unbind().change(function () {
+                    _this.uploadFile();
+                });
+            }else {
+                $(".ajax_error").html(data.message);
+                $(".modal").modal("toggle");
+            }
         })
     },
     submit(){
@@ -66,7 +70,7 @@ var CreateOffer = React.createClass({
             $(".has-error input:first").focus();
         }
     },
-    savePrice(){
+    savePrice(isShow){
         var _this = this;
         var result=[];
         var dd = $(".price-calendar dd");
@@ -82,7 +86,9 @@ var CreateOffer = React.createClass({
         })).then(function (data) {
             var data = JSON.parse(data);
             if(data.code==200){
-                _this.price();
+                if(!isShow){
+                    _this.price();
+                }
             }else {
                 $(".ajax_error").html(data.message);
                 $(".modal").modal("toggle");
@@ -132,7 +138,7 @@ var CreateOffer = React.createClass({
                     _this.savePrice();
                 });
                 $(".cal-save").on("click",function () {
-                    _this.savePrice();
+                    _this.savePrice(true);
                     $(".price-calendar").hide();
                 });
                 $(".cal-cancel").on("click",function () {
@@ -146,6 +152,17 @@ var CreateOffer = React.createClass({
     },
     componentDidMount(){
         var _this = this;
+        ajax("get","/api/user_select").then(function (data) {
+            var data = JSON.parse(data);
+            if(data.code=="200"){
+                _this.setState({
+                    userId:data.result
+                })
+            }else {
+                $(".ajax_error").html(data.message);
+                $(".modal").modal("toggle");
+            }
+        });
         if(this.props.params.id){
             /*　ｓｅｌｅｃｔ之前为ａｊａｘ获取改为直接调取获取所有的　*/
             ajax("post","/api/country_select",JSON.stringify({name:""})).then(function (data) {
@@ -276,7 +293,13 @@ var CreateOffer = React.createClass({
                             销售
                         </div>
                         <div className="col-sm-3">
-                            <input type="text" className="form-control" data-key="user_id"/>
+                            <select className="form-control"  data-key="user_id">
+                                {
+                                    this.state.userId.map(function (ele,index,array) {
+                                        return <option key={index} value={ele.id}>{ele.name+" ("+ele.id+") "}</option>
+                                    })
+                                }
+                            </select>
                         </div>
                     </div>
                     <div className="col-sm-12">
@@ -386,7 +409,7 @@ var CreateOffer = React.createClass({
                         </div>
                         <div className="col-sm-3" style={{position:"relative"}}>
                             <input type="file" name="file" onChange={this.uploadFile} id="import" style={{position:"absolute",top:0,left:0,right:0,bottom:0,display:'block',opacity:0,zIndex:1}}/>
-                            <button　className="btn btn-primary">Import</button>
+                            <button type="button" className="btn btn-primary">Import</button>
                         </div>
                     </div>
                     <div className="col-sm-10">
@@ -399,7 +422,7 @@ var CreateOffer = React.createClass({
                                             return <tr key={index}>
                                                         <td>{ele.country}</td>
                                                         <td><input type="number" defaultValue={ele.price} className="form-control" /></td>
-                                                        <td><img onClick={_this.price} data-country={ele.country} className="calendar_img" style={{cursor:"pointer"}} src="./src/img/calender.jpg"/></td>
+                                                        <td><img onClick={_this.price} data-country={ele.country} className="calendar_img" style={{cursor:"pointer",width:"24px"}} src="./src/img/calender.jpg"/></td>
                                                     </tr>
                                         })
                                     }
