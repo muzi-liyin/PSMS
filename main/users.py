@@ -99,8 +99,8 @@ def do_edit_user(id):
 
 @users.route('/api/user/edit/<id>', methods=['POST', 'GET'])
 def edit_user(id):
-    role_ids = [6]
-    permission_ids = [9, 10]
+    role_ids = []
+    permission_ids = [12]
     if request.method == "POST":
         data = request.get_json(force=True)
         if not db.session.query(User).filter_by(id=id).first():
@@ -158,13 +158,16 @@ def login_in():
     if request.method == "POST":
         data = request.get_json(force=True)
         user = db.session.query(User).filter_by(name=data["name"]).first()
-        user_id = db.session.query(User).filter_by(name=data["name"]).first().id
-        user.last_datetime = str(datetime.now())
-        if data["passwd"] == base64.decodestring(user.passwd):
-            session["user_id"] = user_id
-            return json.dumps({"code": "200", "message": "success", "results": session["name"]})
+        if user:
+            user_id = db.session.query(User).filter_by(name=data["name"]).first().id
+            user.last_datetime = str(datetime.now())
+            if data["passwd"] == base64.decodestring(user.passwd):
+                session["user_id"] = user_id
+                return json.dumps({"code": "200", "message": "success", "results": session["user_id"]})
+            else:
+                return json.dumps({"code": "500", "message": "password error!"})
         else:
-            return json.dumps({"code": "500", "message": "password error!"})
+            return json.dumps({"code": "500", "message": "user has not register"})
 
 
 @users.route('/api/user/logout', methods=['POST', 'GET'])
