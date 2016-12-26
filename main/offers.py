@@ -134,7 +134,6 @@ def offerShow():
     return json.dumps(response)
 
 
-
 @offers.route('/api/offer_detail/<id>', methods=["GET"])
 @Permission.check(models=['offer_query'])
 def offerDetail(id):

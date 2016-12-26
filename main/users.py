@@ -11,14 +11,29 @@ from main.models import User, Role, Permissions, UserRole, RolePermissions, User
 users = Blueprint('users', __name__)
 
 
+@users.route('/api/user/verify_session', methods=['POST', 'GET'])
+def verify_session():
+    if 'user_id' in session:
+        user_id = session['user_id']
+        user = db.session.query(User).filter_by(id=user_id).first()
+        data = {
+            'id': user.id,
+            'name': user.name,
+            'email': user.email
+        }
+        return json.dumps({"code": "200", "message": "success", "results": data})
+    else:
+        return json.dumps({"code": "500", "message": "please login in"})
+
+
 @users.route('/api/user/create', methods=['POST', 'GET'])
 def create_user():
     role_ids = [4]
-    permission_ids = [9, 10]
+    permission_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     if request.method == "POST":
         data = request.get_json(force=True)
-        if db.session.query(User).filter_by(name=data["name"]).first():
-            return json.dumps({"code": "500", "message": "user name has exist"})
+        if db.session.query(User).filter_by(email=data["email"]).first():
+            return json.dumps({"code": "500", "message": "user has exist"})
         user = User(data["name"], data["email"], base64.encodestring(data["passwd"]), data["phone"])
         db.session.add(user)
         db.session.commit()
@@ -100,7 +115,7 @@ def do_edit_user(id):
 @users.route('/api/user/edit/<id>', methods=['POST', 'GET'])
 def edit_user(id):
     role_ids = []
-    permission_ids = [12]
+    permission_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     if request.method == "POST":
         data = request.get_json(force=True)
         if not db.session.query(User).filter_by(id=id).first():
@@ -117,7 +132,6 @@ def edit_user(id):
             # print user_role_ago.role_id
             db.session.delete(user_role_ago)
         db.session.commit()
-
 
         # if db.session.query(User).filter_by(name=data["name"]).first():
         #     return json.dumps({"code": "500", "message": "user name has exist"})
@@ -153,17 +167,27 @@ def edit_user(id):
         return json.dumps({"code": "200", "message": "success"})
     return json.dumps({"code": "500", "message": "request method error"})
 
+
 @users.route('/api/user/login', methods=['POST', 'GET'])
 def login_in():
     if request.method == "POST":
         data = request.get_json(force=True)
-        user = db.session.query(User).filter_by(name=data["name"]).first()
+        user = db.session.query(User).filter_by(email=data["email"]).first()
         if user:
-            user_id = db.session.query(User).filter_by(name=data["name"]).first().id
+            user_id = db.session.query(User).filter_by(email=data["email"]).first().id
             user.last_datetime = str(datetime.now())
             if data["passwd"] == base64.decodestring(user.passwd):
                 session["user_id"] = user_id
-                return json.dumps({"code": "200", "message": "success", "results": session["user_id"]})
+                # 查出用户的所有信息
+                datas = {
+                    'id': user.id,
+                    'name': user.name,
+                    'email': user.email,
+                    'passwd': base64.decodestring(user.passwd),
+                    'phone': user.phone,
+                    'last_datetime': user.last_datetime
+                }
+                return json.dumps({"code": "200", "message": "success", "results": datas})
             else:
                 return json.dumps({"code": "500", "message": "password error!"})
         else:
@@ -172,7 +196,7 @@ def login_in():
 
 @users.route('/api/user/logout', methods=['POST', 'GET'])
 def login_out():
-    if request.method == "POST":
+    if request.method == "GET":
         session.pop('user_id', None)
         return json.dumps({"code": "200", "message": "success"})
     return json.dumps({"code": "500", "message": "request method error"})
