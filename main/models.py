@@ -2,6 +2,66 @@
 from datetime import datetime
 from main import db
 
+
+# 用户,角色关联
+# user_role = db.Table('user_role',
+# db.Column('id', db.Integer, primary_key=True),
+# db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+# db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
+# )
+# 角色,权限关联
+# role_permissions = db.Table('role_permissions',
+# db.Column('id', db.Integer, primary_key=True),
+# db.Column('role_id', db.Integer, db.ForeignKey('role.id')),
+# db.Column('permissions_id', db.Integer, db.ForeignKey('permissions.id'))
+# )
+# 用户,权限关联
+# user_permissions = db.Table('user_permissions',
+# db.Column('id', db.Integer, primary_key=True),
+# db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+# db.Column('permissions_id', db.Integer, db.ForeignKey('permissions.id'))
+# )
+
+
+# 用户,角色关联表
+class UserRole(db.Model):
+    __tablename__ = 'user_role'
+    __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)  # , db.ForeignKey('user.id'))
+    role_id = db.Column(db.Integer)  # , db.ForeignKey('role.id'))
+
+    def __init__(self, user_id, role_id):
+        self.user_id = user_id
+        self.role_id = role_id
+
+
+# 角色,权限关联表
+class RolePermissions(db.Model):
+    __tablename__ = 'role_permissions'
+    __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer, primary_key=True)
+    role_id = db.Column(db.Integer)  # , db.ForeignKey('role.id'))
+    permissions_id = db.Column(db.Integer)  # , db.ForeignKey('permissions.id'))
+
+    def __init__(self, role_id, permissions_id):
+        self.role_id = role_id
+        self.permissions_id = permissions_id
+
+
+# 用户,权限关联表
+class UserPermissions(db.Model):
+    __tablename__ = 'user_permissions'
+    __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)  # , db.ForeignKey('user.id'))
+    permissions_id = db.Column(db.Integer)  # , db.ForeignKey('permissions.id'))
+
+    def __init__(self, user_id, permissions_id):
+        self.user_id = user_id
+        self.permissions_id = permissions_id
+
+
 # 用户表
 class User(db.Model):
     __tablename__ = 'user'
@@ -10,7 +70,14 @@ class User(db.Model):
     email = db.Column(db.String(100), nullable=False)
     passwd = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
-    group = db.relationship('Group', backref='user', lazy='dynamic')  # 反向映射关系
+    last_datetime = db.Column(db.DateTime, default=datetime.now())
+
+    # roles = db.relationship('Role', backref='user',
+    #                             lazy='dynamic')
+
+    # roles = db.relationship('Role', secondary=UserRole,
+    #                        backref=db.backref('roles', lazy='dynamic'),
+    #                        lazy='dynamic')
 
     def __init__(self, name, email, passwd, phone):
         self.name = name
@@ -24,13 +91,18 @@ class User(db.Model):
         return user
 
 
-# 用户组的表
-class Group(db.Model):
-    __tablename__ = 'group'
+# 角色表
+class Role(db.Model):
+    __tablename__ = 'role'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    permissions = db.relationship('Permissions', backref='group', lazy='dynamic')  # 反向映射关系
+    name = db.Column(db.String(100), nullable=False, unique=True)
+
+    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    # permissions = db.relationship('Permissions', backref='role',
+    #                             lazy='dynamic')
+    # permission = db.relationship('Permissions', secondary=RolePermissions,
+    #                               backref=db.backref('permission', lazy='dynamic'),
+    #                               lazy='dynamic')
 
     def __init__(self, name):
         self.name = name
@@ -41,17 +113,16 @@ class Permissions(db.Model):
     __tablename__ = 'permissions'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id'))
+
+    # role_id = db.Column(db.Integer, db.ForeignKey('role.id'))
+
+    # users = db.relationship('User', secondary=UserPermissions,
+    #                        backref=db.backref('users', lazy='dynamic'),
+    #                        lazy='dynamic')
 
     def __init__(self, name):
         self.name = name
 
-# 用户表
-# 角色表
-# 用户组表
-# 权限表
-# 用户用户组关联表
-# 关联表
 
 # 客户表
 class Customers(db.Model):
@@ -80,43 +151,48 @@ class Customers(db.Model):
 class Offer(db.Model):
     __tablename__ = 'offer'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id')) #销售
-    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id')) #客户
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # 销售
+    customer_id = db.Column(db.Integer, db.ForeignKey('customers.id'))  # 客户
     status = db.Column(db.String(100), default='active')
-    contract_type = db.Column(db.String(100),default='cpa') #合同模式
-    contract_num = db.Column(db.String(100), nullable=False) #合同编号
-    contract_scale = db.Column(db.Float, default=0)  #合同模式为服务费时存在
-    os = db.Column(db.String(100), nullable=False) #操作系统　
-    package_name = db.Column(db.String(100), nullable=False) #包名
+    contract_type = db.Column(db.String(100), default='cpa')  # 合同模式
+    contract_num = db.Column(db.String(100), nullable=False)  # 合同编号
+    contract_scale = db.Column(db.Float, default=0)  # 合同模式为服务费时存在
+    os = db.Column(db.String(100), nullable=False)  # 操作系统　
+    package_name = db.Column(db.String(100), nullable=False)  # 包名
     app_name = db.Column(db.String(100), nullable=False)
     app_type = db.Column(db.String(100), nullable=False)
     preview_link = db.Column(db.String(100), nullable=False)
     track_link = db.Column(db.String(100), nullable=False)
     material = db.Column(db.String(100), default="yes")
-    startTime = db.Column(db.String(100), nullable=False) #投放开始时间
-    endTime = db.Column(db.String(100), nullable=False) #投放结束时间
-    platform = db.Column(db.String(100), nullable=False)  #投放平台
-    country = db.Column(db.String(100), nullable=False)   #投放国家
-    price = db.Column(db.Float, default=0) #投放单价
-    daily_budget = db.Column(db.Float, default=0) #最高日预算
-    daily_type = db.Column(db.String(100), default='install') #最高日预算的类型
-    total_budget = db.Column(db.Float, default=0) #最高总预算
-    total_type = db.Column(db.String(100), default='cost') #最高总预算的类型
-    distribution = db.Column(db.String(100), nullable=False)  #预算分配
-    authorized = db.Column(db.String(100), nullable=False) #授权账户
-    named_rule = db.Column(db.String(100), nullable=False) #命名规则
-    KPI = db.Column(db.String(100), nullable=False) #kpi要求
-    settlement = db.Column(db.String(100), nullable=False) #结算标准
-    period = db.Column(db.String(100), nullable=False) #账期
-    remark = db.Column(db.String(100), nullable=False) #备注
-    email_time = db.Column(db.Float, nullable=False)  #邮件发送时间
-    email_users = db.Column(db.String(100), nullable=False) #邮件收件人
-    email_tempalte = db.Column(db.Integer,nullable=False) #报告模版
-    createdTime = db.Column(db.String(100),nullable=False)
-    updateTime = db.Column(db.String(100),nullable=False)
+    startTime = db.Column(db.String(100), nullable=False)  # 投放开始时间
+    endTime = db.Column(db.String(100), nullable=False)  # 投放结束时间
+    platform = db.Column(db.String(100), nullable=False)  # 投放平台
+    country = db.Column(db.String(100), nullable=False)  # 投放国家
+    price = db.Column(db.Float, default=0)  # 投放单价
+    daily_budget = db.Column(db.Float, default=0)  # 最高日预算
+    daily_type = db.Column(db.String(100), default='install')  # 最高日预算的类型
+    total_budget = db.Column(db.Float, default=0)  # 最高总预算
+    total_type = db.Column(db.String(100), default='cost')  # 最高总预算的类型
+    distribution = db.Column(db.String(100), nullable=False)  # 预算分配
+    authorized = db.Column(db.String(100), nullable=False)  # 授权账户
+    named_rule = db.Column(db.String(100), nullable=False)  # 命名规则
+    KPI = db.Column(db.String(100), nullable=False)  # kpi要求
+    settlement = db.Column(db.String(100), nullable=False)  # 结算标准
+    period = db.Column(db.String(100), nullable=False)  # 账期
+    remark = db.Column(db.String(100), nullable=False)  # 备注
+    email_time = db.Column(db.Float, nullable=False)  # 邮件发送时间
+    email_users = db.Column(db.String(100), nullable=False)  # 邮件收件人
+    email_tempalte = db.Column(db.Integer, nullable=False)  # 报告模版
+    createdTime = db.Column(db.String(100), nullable=False)
+    updateTime = db.Column(db.String(100), nullable=False)
     historys = db.relationship('History', backref='offer', lazy='dynamic')
 
-    def __init__(self, user_id,customer_id,status="active",contract_type="cpa",contract_num=None,contract_scale=0,os=None,package_name=None,app_name=None,app_type=None,preview_link=None,track_link=None,material="yes",startTime=None,endTime=None,platform=None,country=None,price=0,daily_budget=0,daily_type="install",total_budget=0,total_type="cost",distribution=None,authorized=None,named_rule=None,KPI=None,settlement=None,period=None,remark=None,email_time=0,email_users=None,email_tempalte=1,createdTime=None,updateTime=None):
+    def __init__(self, user_id, customer_id, status="active", contract_type="cpa", contract_num=None, contract_scale=0,
+                 os=None, package_name=None, app_name=None, app_type=None, preview_link=None, track_link=None,
+                 material="yes", startTime=None, endTime=None, platform=None, country=None, price=0, daily_budget=0,
+                 daily_type="install", total_budget=0, total_type="cost", distribution=None, authorized=None,
+                 named_rule=None, KPI=None, settlement=None, period=None, remark=None, email_time=0, email_users=None,
+                 email_tempalte=1, createdTime=None, updateTime=None):
         self.user_id = user_id
         self.customer_id = customer_id
         self.status = status
@@ -145,14 +221,16 @@ class Offer(db.Model):
         self.KPI = KPI
         self.settlement = settlement
         self.period = period
-        self.remark=remark
+        self.remark = remark
         self.email_time = email_time
         self.email_users = email_users
         self.email_tempalte = email_tempalte
         self.createdTime = createdTime
         self.updateTime = updateTime
+
     def __repr__(self):
         return '<Offer {}>'.format(self.id)
+
 
 class History(db.Model):
     __tablename__ = 'history'
@@ -170,7 +248,7 @@ class History(db.Model):
     total_budget = db.Column(db.Float, default=0)
     total_type = db.Column(db.String(100), nullable=True)  # 最高总预算的类型
     KPI = db.Column(db.String(100), nullable=False)  # kpi要求
-    contract_type = db.Column(db.String(100), nullable=False) # 合同模式
+    contract_type = db.Column(db.String(100), nullable=False)  # 合同模式
     contract_scale = db.Column(db.Float, default=0)  # 合同模式为服务费时存在
 
     def __init__(self, offer_id, user_id, type, createdTime, status=None, country=None, country_price=0, price=0,
@@ -195,21 +273,23 @@ class History(db.Model):
     def __repr__(self):
         return '<History {}>'.format(self.id)
 
-#国家编码
+
+# 国家编码
 class Country(db.Model):
     __tablename__ = 'country'
     id = db.Column(db.Integer, primary_key=True)
-    shorthand = db.Column(db.String(100),nullable=False)  #两位字母简写
-    british = db.Column(db.String(100),nullable=False)   #英文全称
-    chinese = db.Column(db.String(100),nullable=False)   #中文
+    shorthand = db.Column(db.String(100), nullable=False)  # 两位字母简写
+    british = db.Column(db.String(100), nullable=False)  # 英文全称
+    chinese = db.Column(db.String(100), nullable=False)  # 中文
 
-    def __init__(self, shorthand,british,chinese):
+    def __init__(self, shorthand, british, chinese):
         self.shorthand = shorthand
         self.british = british
         self.chinese = chinese
 
     def __repr__(self):
         return '<Country {}>'.format(self.id)
+
 
 class TimePrice(db.Model):
     __tablename__ = 'timePrice'
@@ -218,7 +298,7 @@ class TimePrice(db.Model):
     date = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float, nullable=False)
 
-    def __init__(self,country_id, date, price):
+    def __init__(self, country_id, date, price):
         self.country_id = country_id
         self.date = date
         self.price = price
