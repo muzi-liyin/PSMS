@@ -46,8 +46,8 @@ class UserPermissions(db.Model):
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
-    email = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False, unique=True)
     passwd = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
     last_datetime = db.Column(db.DateTime, default=datetime.now())
@@ -69,6 +69,7 @@ class Role(db.Model):
     __tablename__ = 'role'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False, unique=True)
+    last_datetime = db.Column(db.DateTime, default=datetime.now())
 
     def __init__(self, name):
         self.name = name
