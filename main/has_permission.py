@@ -24,11 +24,10 @@ class Permission(object):
                 else:
                     permission_list = []
                     user_permissions = db.session.query(UserPermissions).filter_by(user_id=user_id)
-                    for user_permission in user_permissions:
+                    for user_permission in eval(user_permissions.permissions_id):
                         permission_list.append(
-                            db.session.query(Permissions).filter_by(id=user_permission.permissions_id).first().name)
+                            db.session.query(Permissions).filter_by(id=user_permission).first().name)
                     for model in models:
-                        print model
                         if model not in permission_list:
                             return json.dumps(dict(code=403, message='no permission'))
                 return func(*args, **kw)

@@ -10,7 +10,7 @@ import json
 
 customers = Blueprint('customers', __name__)
 
-
+# 创建客户
 @customers.route('/api/customers/create', methods=['POST', 'GET'])
 def create_customer():
     if request.method == "POST":
@@ -26,7 +26,7 @@ def create_customer():
         return json.dumps({"code": "200", "message": "success"})
     return json.dumps({"code": "500", "message": "request method error"})
 
-
+# 查询所有客户
 @customers.route('/api/customers', methods=['POST', 'GET'])
 def customer():
     if request.method == "GET":
@@ -54,7 +54,7 @@ def customer():
         return json.dumps(data)
     return json.dumps({"code": "500", "message": "request method error"})
 
-
+# 当前客户详情
 @customers.route('/api/customers/query/<id>', methods=['POST', 'GET'])
 def query_customer(id):
     if request.method == "GET":
@@ -69,7 +69,7 @@ def query_customer(id):
         return json.dumps(data)
     return json.dumps({"code": "500", "message": "request method error"})
 
-
+# 编辑用户详情
 @customers.route('/api/customers/edit/<id>', methods=['POST', 'GET'])
 def edit_customer(id):
     if request.method == "POST":
@@ -86,7 +86,7 @@ def edit_customer(id):
             return json.dumps({"code": "500", "message": "don't have this data"})
     return json.dumps({"code": "500", "message": "request method error"})
 
-
+# 删除当前客户
 @customers.route('/api/customers/delete/<id>', methods=['POST', 'GET'])
 def delete_customer(id):
     if request.method == "POST":
