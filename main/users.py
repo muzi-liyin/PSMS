@@ -2,11 +2,11 @@
 import base64
 from datetime import datetime
 
-from flask import Flask, Blueprint, request, session, g
+from flask import Flask, Blueprint, request, session
 import json
 
 from main import db
-from main.models import User, Role, Permissions, UserRole, RolePermissions, UserPermissions
+from main.models import User, Role, UserRole, RolePermissions, UserPermissions
 
 users = Blueprint('users', __name__)
 
@@ -77,6 +77,7 @@ def do_edit_user(id):
     return json.dumps({"code": "500", "message": "request method error"})
 
 
+# 编辑用户
 @users.route('/api/user/edit/<id>', methods=['POST', 'GET'])
 def edit_user(id):
     if request.method == "POST":
@@ -104,6 +105,7 @@ def edit_user(id):
     return json.dumps({"code": "500", "message": "request method error"})
 
 
+# 用户登录
 @users.route('/api/user/login', methods=['POST', 'GET'])
 def login_in():
     if request.method == "POST":
@@ -133,6 +135,7 @@ def login_in():
             return json.dumps({"code": "500", "message": "user has not register"})
 
 
+# 用户登出
 @users.route('/api/user/logout', methods=['POST', 'GET'])
 def login_out():
     if request.method == "GET":
@@ -172,6 +175,7 @@ def get_all_permissions():
     data_dict['results'] = data
     return json.dumps(data_dict)
 
+
 # 创建用户组
 @users.route('/api/role/create', methods=['POST', 'GET'])
 def create_role():
@@ -210,7 +214,7 @@ def get_all_roles():
     return json.dumps(msg_dict)
 
 
-# 编辑组
+# 编辑用户组
 @users.route('/api/role/do_edit/<id>', methods=['POST', 'GET'])
 def do_edit_role(id):
     if request.method == "POST":
@@ -228,7 +232,7 @@ def do_edit_role(id):
         return json.dumps({"code": "500", "message": "request method error"})
 
 
-# 编辑组
+# 编辑用户组
 @users.route('/api/role/edit/<id>', methods=['POST', 'GET'])
 def edit_role(id):
     if request.method == "POST":
@@ -248,5 +252,10 @@ def edit_role(id):
 @users.route('/api/role_permissions/<id>', methods=['POST', 'GET'])
 def get_role_permissions(id):
     permissions = db.session.query(RolePermissions).filter_by(role_id=id).first()
-    permissions_list = eval(permissions.permissions_id)
-    return json.dumps(permissions_list)
+    permissions_list = permissions.permissions_id
+    data = {
+        'code': '200',
+        'message': 'success',
+        'results': {'permission_ids': permissions_list}
+    }
+    return json.dumps(data)
