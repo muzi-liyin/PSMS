@@ -13,6 +13,9 @@ from sqlalchemy import desc
 
 offers = Blueprint('offers', __name__)
 
+@offers.route('/api/getlogin',methods=["GET","POST"])
+def getlogin():
+    return render_template("token.html")
 
 @offers.route('/api/customer_select', methods=['POST', 'GET'])
 def customerSelect():
