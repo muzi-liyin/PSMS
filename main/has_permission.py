@@ -2,9 +2,9 @@
 # coding=utf-8
 from functools import wraps
 import json
-from flask import session, render_template, make_response
+from flask import session
 from main import db
-from main.models import User, Role, Permissions, UserPermissions
+from main.models import User, Permissions, UserPermissions
 
 
 class Permission(object):
