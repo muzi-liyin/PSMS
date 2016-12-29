@@ -8,7 +8,6 @@ import {uploadFile} from "../lib/uploadFile";
 import moment from "moment";
 
 var CreateOffer = React.createClass({
-
     getInitialState() {
         return {
             result:[],
@@ -164,6 +163,7 @@ var CreateOffer = React.createClass({
             }
         });
         if(this.props.params.id){
+            sessionStorage.setItem("count","1");
             /*　ｓｅｌｅｃｔ之前为ａｊａｘ获取改为直接调取获取所有的　*/
             ajax("post","/api/country_select",JSON.stringify({name:""})).then(function (data) {
                 var data = JSON.parse(data);

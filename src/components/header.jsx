@@ -17,7 +17,7 @@ var Header = React.createClass({
         });
     },
     componentDidMount(){
-        if(location.hash!="#/login"){
+        if(location.hash!=""&&location.hash!="#/login"){
             ajax("post","/api/user/verify_session").then(function (data) {
                 var data = JSON.parse(data);
                 if(data.code=="200"){
@@ -62,6 +62,18 @@ var Header = React.createClass({
 
                 <div className="collapse nav_right navbar-collapse" id="nav_nav">
                     <ul className="nav ul_active navbar-nav isShow">
+                        <li data-hash="manager" className="dropdown">
+                            <a href="javascript:void(0)" className="dropdown-toggle" data-toggle="dropdown">Manager <span className="caret"></span></a>
+                            <ul className="dropdown-menu" role="menu">
+                                <li><a href="#/create_manager">Create Manager</a></li>
+                                <li className="divider"> </li>
+                                <li><a href="#/manager_list">Manager List</a></li>
+                                <li className="divider"> </li>
+                                <li><a href="#/create_group_manager">Create Group</a></li>
+                                <li className="divider"> </li>
+                                <li><a href="#/group_list_manager">Group List</a></li>
+                            </ul>
+                        </li>
                         <li data-hash="customer" className="dropdown">
                             <a href="javascript:void(0)" className="dropdown-toggle" data-toggle="dropdown">Advertiser <span className="caret"></span></a>
                             <ul className="dropdown-menu" role="menu">

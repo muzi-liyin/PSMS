@@ -8,7 +8,7 @@ var App = React.createClass({
         }
     },
     componentWillUpdate(){
-        if(location.hash!="#/login"){
+        if(location.hash!=""&&location.hash!="#/login"){
             ajax("post","/api/user/verify_session").then(function (data) {
                 var data = JSON.parse(data);
                 if(data.code=="200"){
@@ -17,7 +17,7 @@ var App = React.createClass({
                     $(".isShow").show();
                 }else {
                     $(".ajax_error").html(data.message);
-                    $(".modal").modal("toggle");
+                    $(".modal").modal("show");
                     $(".userEmail").html("");
                     $(".userId").html("");
                     $(".modal").on("hidden.bs.modal",function () {
@@ -36,6 +36,10 @@ var App = React.createClass({
         console.log("componentWillMount----------")
     },
     componentWillReceiveProps(){
+        if(sessionStorage.getItem("count")){
+            location.reload();
+            sessionStorage.removeItem("count")
+        }
         console.log("componentWillReceiveProps----------------------------");
     },
     componentDidMount(){

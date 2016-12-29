@@ -18,7 +18,7 @@ var ajax = function (method,url,data) {
                 reject(e);
                 $(".ajax_error").html(e.status+"---"+e.statusText);
                 $(".mask").hide();
-                $(".modal").modal("toggle");
+                $(".modal").modal("show");
             }
         });
     });
