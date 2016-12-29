@@ -6,7 +6,7 @@ var path = require("path");
 
 module.exports = {
     entry:{
-        main:path.resolve(__dirname,"main.js"),
+        main:'./main',//path.resolve(__dirname,"main.js"),
         vendors: []
     },
     output:{
